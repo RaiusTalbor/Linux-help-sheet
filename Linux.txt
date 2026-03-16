@@ -391,8 +391,35 @@ and then make it executable:
 (giving permissions to execute)
 
 ------------------------------------------------------------------------------------------------------------------------------
+Package Manager APT
+------------------------------------------------------------------------------------------------------------------------------
+for Debian, Ubuntu, Mint, ...
+
+apt install [package]
+sudo apt install [Paket-Name-1] [Paket-Name-2] ... [paketname-n]
+apt install [Paket-Name]=[Version] (specific version)
+apt-get install [package]
+apt reinstall [Paket-Name]
+apt-get remove [package]
+apt-get --purge remove [paketname] (entfernt ein Paket und die Konfigurationsdateien)
+apt autoremove (not used packages will be deleted)
+apt purge [Paket-Name] (clean package / correct broken files)
+apt update (holt Updates)
+apt upgrade (Installiert sie)
+sudo apt update && sudo apt upgrade -y (kombiniert und automatisch mit yes beantwortet)
+apt search [search-text] (searching for packages)
+apt show [package-name]
+apt list --installed
+apt list --upgradable
+apt depends [package-name] (show dependencies)
+apt help
+
+Apt und Apt-get unterscheiden sich nur geringfügig
+
+------------------------------------------------------------------------------------------------------------------------------
 Package Manager RPM
 ------------------------------------------------------------------------------------------------------------------------------
+for Red Hat Enterprise Linux, Fedora, CentOS, AlmaLinux, openSUSE, ...
 
 Operation	rpm	deb
 Install package	rpm -i foo.rpm	dpkg --install foo.deb
