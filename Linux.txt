@@ -9,7 +9,7 @@ Table of content:
 Installation
 Basics
 More Rights
-Manual Pages (man)
+Find help - Manual Pages (tldr, man, gnome-help)
 Alias - Redefining and Renaming Commands
 Reboot tut gut
 Connect via SSH
@@ -59,8 +59,16 @@ su - substitute user ("Alles")
 sudo - superuser do ("den Befehl")
 
 ------------------------------------------------------------------------------------------------------------------------------
-Manual Pages
+Find help - Manual Pages
 ------------------------------------------------------------------------------------------------------------------------------
+
+man
+---------------------
+
+man [package]
+show discription and Manual Page
+
+divided in topics
 
 A given topic may have multiple pages associated with it and there is a default order determining which one is displayed when no options or section number is specified.
 To list all pages on the topic, use the -f option. 
@@ -74,7 +82,15 @@ man 7 <name> ... specific chapter (7)
 man -a <name> ... all but in order nacheinander wie Buch
 man -k <name> ... shows all they have <name> in their description
 
+tldr
+---------------------
+Install first (--> Package Management)
+
+tldr [package]
+show discription and most common commands/use cases
+
 gnome-help
+---------------------
 yelp
 
 ------------------------------------------------------------------------------------------------------------------------------
