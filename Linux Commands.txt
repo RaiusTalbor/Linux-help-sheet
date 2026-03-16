@@ -4,6 +4,32 @@ LINUX
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
 
+Table of content:
+----------------------
+Basics
+More Rights
+Manual Pages (man)
+Alias - Redefining and Renaming Commands
+Reboot tut gut
+Connect via SSH
+Directory of Output or Input
+Navigating through Directory
+Managing Directories
+Find Directories
+Special Linux Directories
+Reading a file
+Comparing files
+Links to files
+Editors (Nano, VIM, Emacs)
+Creating executable files
+Package Manager RPM
+System Control
+Managing Processes
+Automated Jobs (At, cron, sleep)
+Synchronize Directories
+Compressing (gzip, bzip2, xz, zip, tar)
+Users (Managing Users, group users)
+
 ------------------------------------------------------------------------------------------------------------------------------
 Basics
 ------------------------------------------------------------------------------------------------------------------------------
@@ -51,7 +77,7 @@ To make the alias persistent, just place it in your $HOME/.bashrc file.
 Reboot tut gut
 ------------------------------------------------------------------------------------------------------------------------------
 
-shutdown
+shutdown now
 reboot
 sudo shutdown -h 10:00 "Dies hier ist die Warnung, -h macht die nächste Uhrzeit fest." 
 
