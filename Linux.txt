@@ -57,6 +57,7 @@ More Rights
 
 su - substitute user ("Alles")
 sudo - superuser do ("den Befehl")
+sudo -i (führt jeden Befehl mit sudo aus - keine Best Practice)
 
 ------------------------------------------------------------------------------------------------------------------------------
 Find help - Manual Pages
