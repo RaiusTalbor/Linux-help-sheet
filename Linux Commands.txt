@@ -6,6 +6,7 @@ LINUX
 
 Table of content:
 ----------------------
+Installation
 Basics
 More Rights
 Manual Pages (man)
@@ -29,6 +30,18 @@ Automated Jobs (At, cron, sleep)
 Synchronize Directories
 Compressing (gzip, bzip2, xz, zip, tar)
 Users (Managing Users, group users)
+
+------------------------------------------------------------------------------------------------------------------------------
+Installation
+------------------------------------------------------------------------------------------------------------------------------
+Choosing right distribution: distrowatch.com , https://distrochooser.de/de
+e.g. Ubuntu, Debian, Mint, Fedora, Red Hat Enterprise Linux (RHEL), Arch, openSUSE, NixOS, Kali Linux, ...
+
+Most have Live-Versions: Testing out without installing
+https://documentation.ubuntu.com/desktop/en/latest/tutorial/try-ubuntu-desktop/
+
+--> flash USB with ISO --> Boot from USB --> Test Distro --> Remove or Installing from Live Version
+(Dual Boot with Windows possible)
 
 ------------------------------------------------------------------------------------------------------------------------------
 Basics
