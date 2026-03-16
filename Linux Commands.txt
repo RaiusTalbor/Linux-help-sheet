@@ -1,0 +1,607 @@
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+LINUX
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------------
+Basics
+------------------------------------------------------------------------------------------------------------------------------
+
+echo : gibt es wieder
+
+strg+L clear screen
+
+------------------------------------------------------------------------------------------------------------------------------
+More Rights
+------------------------------------------------------------------------------------------------------------------------------
+
+su - substitute user ("Alles")
+sudo - superuser do ("den Befehl")
+
+------------------------------------------------------------------------------------------------------------------------------
+Manual Pages
+------------------------------------------------------------------------------------------------------------------------------
+
+A given topic may have multiple pages associated with it and there is a default order determining which one is displayed when no options or section number is specified.
+To list all pages on the topic, use the -f option. 
+To list all pages that discuss a specific topic (even if the specified subject is not present in the name), use the –k option.
+
+    man –f generates the same result as typing whatis.
+    man –k generates the same result as typing apropos.
+
+man -f <name> ... all
+man 7 <name> ... specific chapter (7)
+man -a <name> ... all but in order nacheinander wie Buch
+man -k <name> ... shows all they have <name> in their description
+
+gnome-help
+yelp
+
+------------------------------------------------------------------------------------------------------------------------------
+Alias - Redefining and Renaming Commands
+------------------------------------------------------------------------------------------------------------------------------
+
+alias <name>=<cmd> ... redefine new command
+unalias ... undefine this command
+alias ... shiow aliases
+To make the alias persistent, just place it in your $HOME/.bashrc file.
+
+------------------------------------------------------------------------------------------------------------------------------
+Reboot tut gut
+------------------------------------------------------------------------------------------------------------------------------
+
+shutdown
+reboot
+sudo shutdown -h 10:00 "Dies hier ist die Warnung, -h macht die nächste Uhrzeit fest." 
+
+------------------------------------------------------------------------------------------------------------------------------
+Connect via SSH
+------------------------------------------------------------------------------------------------------------------------------
+
+ssh bn@dns.com
+
+------------------------------------------------------------------------------------------------------------------------------
+Directory of Output or Input
+------------------------------------------------------------------------------------------------------------------------------
+
+| : Output is input of another
+
+do_something < input-file
+do_something > output-file
+do_something < input-file > output-file
+> redirect into
+>> append
+
+A special shorthand notation can send anything written to file descriptor 2 (stderr) to the same place as file descriptor 1 (stdout): 2>&1.
+
+$ do_something > all-output-file 2>&1
+
+bash permits an easier syntax for the above:
+
+$ do_something >& all-output-file
+
+do_something 2> error-file #2 wegen standarderror ebenen gedöns
+
+------------------------------------------------------------------------------------------------------------------------------
+Navigating through Directory
+------------------------------------------------------------------------------------------------------------------------------
+
+which - zeigt Pfad einer ausführbaren Datei
+wheris - zeigt Pfad (mächtiger)
+
+pwd	Displays the present working directory
+cd ~ or cd	Change to your home directory; shortcut name is ~ (tilde)
+cd ..	Change to parent directory (..)
+cd -	Change to previous working directory; - (minus)
+. present directory
+
+pushd /tmp (geht dorthin und packt es auf Stack, "vorwärts", ohne Pfad tauscht es einfach nur die oberen beiden)
+popd (nimmt das oberste weg (aktuelles) und geht zum nächsten in Liste, "rückwärts")
+--> speichert nur mit pushd
+--> mit dirs pfad angezeigt
+
+ls zeigt alle darunterliegenden Ordner, kann filtern z.B. ls *file*
+ls -a listet Dateien noch dazu
+tree zeigt Baum darunter
+tree -d only directories
+df -h #filesystems (in Human readable)
+
+------------------------------------------------------------------------------------------------------------------------------
+Managing Directories
+------------------------------------------------------------------------------------------------------------------------------
+
+touch is used to set the access, change, and edit times of files, as well as to create empty files.
+
+mkdir <path>
+rmdir <path> (delete)
+rm -rf <path> (remove it with everything in it)
+rm -i (remove with Bestätigung)
+cp copy
+
+mv old new
+-Simply rename a file/dir
+-Move a file to another location, while possibly changing its name at the same time.
+
+du -sh - estimate file space usage, summerized human readable
+
+------------------------------------------------------------------------------------------------------------------------------
+Find Directories
+------------------------------------------------------------------------------------------------------------------------------
+
+locate (findet dateien)
+--> kann "update updatedb" nach Änderung benötigen
+
+info: dd for copy and convert
+
+find ... recursive #-name (only list files with a certain pattern in their name), -iname (also ignore the case of file names), and -type (which will restrict the results to files of a certain specified type, such as d for directory, l for symbolic link, or f for a regular file, etc.). 
+
+Another good use of find is being able to run commands on the files that match your search criteria. The -exec option is used for this purpose.
+
+To find and remove all files that end with .swp:
+
+$ find -name "*.swp" -exec rm {} ';'
+
+The {} (squiggly brackets) is a placeholder that will be filled with all the file names that result from the find expression, and the preceding command will be run on each one individually.
+
+Please note that you have to end the command with either ';' (including the single-quotes) or \;. Both forms are fine.
+
+One can also use the -ok option, which behaves the same as -exec, except that find will prompt you for permission before executing the command. This makes it a good way to test your results before blindly executing any potentially dangerous commands.
+
+------------------------------------------------------------------------------------------------------------------------------
+Special Linux Directories
+------------------------------------------------------------------------------------------------------------------------------
+
+$ sudo mount /dev/sda5 /home
+will attach the filesystem contained in the disk partition associated with the /dev/sda5 device node into the filesystem tree at the /home mount point
+
+sudo umount /home (NOT uNmount)
+
+df -Th ... information about mounted filesystems
+
+/root ... Home SU
+/home ... personal files
+/bin ... Binairies requiered by all
+/sbin ... Binairies esential for system
+Theorie: not essential: /usr/bin --> but obsolete
+/dev ... mounted devices
+/var ... variable entries like log files, lib, print queries, temps, network things too... (big data won't destroy sys)
+/etc ... sys config files (not user-specific, they are under /usr)
+/boot ... for starting sys
+/lib sometimes additionally /lib64 (common code shared by apps and needet to run) (kernel modules under /lib/modules/<kernel-version-number>)
+/run/media/usr/<name> ... temporarily mouted file sys (historically under /media)
+/mnt ... same, but more nfs, normally not mounted or temporarilly partitions like loopback fs 
+/opt ... Optional application software packages
+/sys ... Virtual pseudo-filesystem giving information about the system and the hardware
+Can be used to alter system parameters and for debugging purposes
+/srv ... Site-specific data served up by the system
+Seldom used
+/tmp ... Temporary files; on some distributions erased across a reboot and/or may actually be a ramdisk in memory
+/usr ... Multi-user applications, utilities and data
+
+------------------------------------------------------------------------------------------------------------------------------
+Reading a file
+------------------------------------------------------------------------------------------------------------------------------
+
+* everything
+? matches any character
+[set]	Matches any character in the set of characters, for example [adf] will match any occurrence of a, d, or f
+[!set]	Matches any character not in the set of characters
+
+grep :  print lines that match patterns
+
+cat: used to type out a file (or combine files).
+tac	Used to look at a file backwards, starting with the last line. (-n mit Zeilen)
+head: used to show the first few lines of a file.
+tail: used to show the last few lines of a file. -20 letzten 20 Zeilen
+man: used to view documentation.
+
+less #lässt es scrollen wie in man
+
+------------------------------------------------------------------------------------------------------------------------------
+Comparing files
+------------------------------------------------------------------------------------------------------------------------------
+
+diff <option> <files> ---> see man pages
+    -c	Provides a listing of differences that include three lines of context before and after the lines differing in content
+    -r	Used to recursively compare subdirectories, as well as the current directory
+    -i	Ignore the case of letters
+    -w	Ignore differences in spaces and tabs (white space)
+    -q	Be quiet: only report if files are different without listing the differences
+cmp ... for binairies
+diffuse, vimdiff, and meld ... graphical
+
+
+Patch:
+diff -Nur originalfile newfile > patchfile
+patch -p1 < patchfile / patch originalfile patchfile (first more common because recursive)
+
+
+file <name> ... tests file-type
+
+------------------------------------------------------------------------------------------------------------------------------
+Links to files
+------------------------------------------------------------------------------------------------------------------------------
+
+ln file1 file2 #Suppose that file1 already exists. A hard link, called file2, is created with the command
+
+ln -s file1 file3 #softlink: pointer
+
+------------------------------------------------------------------------------------------------------------------------------
+Editors
+------------------------------------------------------------------------------------------------------------------------------
+
+Nano
+-------------------
+nano <file/filedirectory>
+
+VIM
+-------------------
+vim <file/filedirectory>
+
+Command (Default)
+Insert (typing i; for writing)
+Line (Type : to Line editing commands)
+vimtutor ... tutorial
+
+vi myfile	Start the editor and edit myfile
+vi -r myfile	Start and edit myfile in recovery mode from a system crash
+:r file2	Read in file2 and insert at current position
+:w	Write to the file
+:w myfile	Write out to myfile
+:w! file2	Overwrite file2
+:x or :wq	Exit and write out modified file
+:q	Quit
+:q!	Quit even though modifications have not been saved
+
+arrow keys	To move up, down, left and right
+j or <ret>	To move one line down
+k	To move one line up
+h or Backspace	To move one character left
+l or Space	To move one character right
+0	To move to beginning of line
+$	To move to end of line
+w	To move to beginning of next word
+:0 or 1G	To move to beginning of file
+:n or nG	To move to line n
+:$ or G	To move to last line in file
+CTRL-F or Page Down	To move forward one page
+CTRL-B or Page Up	To move backward one page
+^l	To refresh and center screen
+
+/pattern	Search forward for pattern
+?pattern	Search backward for pattern
+n	Move to next occurrence of search pattern
+N	Move to previous occurrence of search pattern
+
+a	Append text after cursor; stop upon Escape key
+A	Append text at end of current line; stop upon Escape key
+i	Insert text before cursor; stop upon Escape key
+I	Insert text at beginning of current line; stop upon Escape key
+o	Start a new line below current line, insert text there; stop upon Escape key
+O	Start a new line above current line, insert text there; stop upon Escape key
+r	Replace character at current position
+R	Replace text starting with current position; stop upon Escape key
+x	Delete character at current position
+Nx	Delete N characters, starting at current position
+dw	Delete the word at the current position
+D	Delete the rest of the current line
+dd	Delete the current line
+Ndd or dNd	Delete N lines
+u	Undo the previous operation
+yy	Yank (copy) the current line and put it in buffer
+Nyy or yNy	Yank (copy) N lines and put it in buffer
+p	Paste at the current position the yanked line or lines from the buffer
+Typing sh command opens an external command shell
+! command within vi (non-interactive)
+! wc % counting words of current textfile (the %)
+
+In Command-mode:
+<number>i<word> Write <word> <number>-times
+f/F<word> find word (number before: third/fourth/...)
+
+emacs
+--------------------
+emacs myfile	Start emacs and edit myfile
+CTRL-x i	Insert prompted for file at current position
+CTRL-x s	Save all files
+CTRL-x CTRL-w	Write to the file giving a new name when prompted
+CTRL-x CTRL-s	Saves the current file
+CTRL-x CTRL-c	Exit after being prompted to save any modified files
+arrow keys	Use the arrow keys for up, down, left and right
+CTRL-n	One line down
+CTRL-p	One line up
+CTRL-f	One character forward/right
+CTRL-b	One character back/left
+CTRL-a	Move to beginning of line
+CTRL-e	Move to end of line
+Meta-f	Move to beginning of next word
+Meta-b	Move back to beginning of preceding word
+Meta-<	Move to beginning of file
+Meta-g-g-n	Move to line n (can also use 'Esc-x Goto-line n')
+Meta->	Move to end of file
+CTRL-v or Page Down	Move forward one page
+Meta-v or Page Up	Move backward one page
+CTRL-l	Refresh and center screen
+
+CTRL-s	Search forward for prompted pattern, or for next pattern
+CTRL-r	Search backwards for prompted pattern, or for next pattern
+
+CTRL-o	Insert a blank line
+CTRL-d	Delete character at current position
+CTRL-k	Delete the rest of the current line
+CTRL-_	Undo the previous operation
+CTRL- (space or CTRL-@)	Mark the beginning of the selected region (the end will be at the cursor position)
+CTRL-w	Delete the current marked text and write it to the buffer
+CTRL-y	Insert at current cursor location whatever was most recently deleted
+
+Ctrl-H and then t Tutorial
+
+------------------------------------------------------------------------------------------------------------------------------
+Creating executable files
+------------------------------------------------------------------------------------------------------------------------------
+
+Create file first (best practice: .sh)
+
+write
+> #!/bin/bash
+on first line (Verweis zu ausführbaren Befehlen)
+
+and then make it executable:
+> chmod +x test.sh
+(giving permissions to execute)
+
+------------------------------------------------------------------------------------------------------------------------------
+Package Manager RPM
+------------------------------------------------------------------------------------------------------------------------------
+
+Operation	rpm	deb
+Install package	rpm -i foo.rpm	dpkg --install foo.deb
+Install package, dependencies	dnf install foo	apt install foo
+Remove package	rpm -e foo.rpm	dpkg --remove foo.deb
+Remove package, dependencies	dnf remove foo	apt autoremove foo
+Update package	rpm -U foo.rpm	dpkg --install foo.deb
+Update package, dependencies	dnf update foo	apt install foo
+Update entire system	dnf update	apt dist-upgrade
+Show all installed packages	rpm -qa or dnf list installed	dpkg --list
+Get information on package	rpm -qil foo	dpkg --listfiles foo
+Show packages named foo	dnf list "foo"	apt-cache search foo
+Show all available packages	dnf list	apt-cache dumpavail foo
+What package is file part of?	rpm -qf file	dpkg --search file
+
+------------------------------------------------------------------------------------------------------------------------------
+System Control
+------------------------------------------------------------------------------------------------------------------------------
+
+Starting, stopping, restarting a service (using httpd, the Apache web server, as an example) on a currently running system:
+$ sudo systemctl start|stop|restart httpd.service
+
+Enabling or disabling a system service from starting up at system boot:
+$ sudo systemctl enable|disable httpd.service
+
+Checking on the status of a service:
+$ sudo systemctl status httpd.service
+
+------------------------------------------------------------------------------------------------------------------------------
+Managing Processes
+------------------------------------------------------------------------------------------------------------------------------
+
+kill -SIGKILL <pid> or kill -9 <pid> ... terminating process you own
+
+ps / ps lf ... see processes
+renice <number> <pid> ... newer nice number (priority number from -20 to 19, lower better)
+-u ... usernamen
+-ef ... processes in sys in detail
+-eLf ... information of every threade
+ps aux ... processes of all users
+ps axo ... specific attributes
+
+--> if cmd in [], from Kernel
+
+pstree (in {} --> threats)
+
+load average: w, top, uptime
+
+Background Jobs
+--------------------
+
+You can put a job in the background by suffixing & to the command, for example: updatedb &.
+
+You can use CTRL-Z to suspend a foreground job (i.e., put it in background) and CTRL-C to terminate it. You can always use the bg command to run a suspended process in the background, or the fg command to run a background process in the foreground.
+
+
+jobs / jobs -l ...shows background jobs
+
+------------------------------------------------------------------------------------------------------------------------------
+Automated Jobs
+------------------------------------------------------------------------------------------------------------------------------
+
+at now + 2 days ... jetzt in 2 Tagen wird ein CMD ausgeführt
+#task eingeben
+Strg+D to quit
+atq ... check on scheduled job
+atrm <id> ... remove
+
+At
+--------------------
+
+Create the file testat.sh containing:
+
+> #!/bin/bash
+> date > /tmp/datestamp
+
+and then make it executable and queue it up with at:
+
+> $ chmod +x testat.sh
+> $ at now + 1 minute -f testat.sh
+
+You can see if the job is queued up to run with atq:
+
+> $ atq
+> 17      Wed Apr 22 08:55:00 2015 a student
+
+Make sure the job actually ran:
+
+> $ cat /tmp/datestamp
+> Wed Apr 22 08:55:00 CDT 2015
+
+What happens if you take the /tmp/datestamp out of the command? Hint: Type mail if not prompted to do so!
+
+--
+
+Interactively, it is basically the same procedure. Just queue up the job with:
+
+> $ at now + 1 minute
+> at> date > /tmp/datestamp
+> CTRL-D
+> $ atq
+
+Cron
+--------------------
+
+Set up a cron job to do a simple task every day at 10 AM. Create a file named mycrontab with the following content:
+
+> 0 10 * * * /tmp/myjob.sh
+
+and then create /tmp/myjob.sh containing:
+
+> #!/bin/bash
+> echo Hello I am running $0 at $(date)
+
+and make it executable:
+
+> $ chmod +x /tmp/myjob.sh
+
+Put it in the crontab system with:
+
+> $ crontab mycrontab
+
+and verify it was loaded with:
+
+> $ crontab -l
+
+> 0 10 * * * /tmp/myjob.sh
+> $ sudo ls -l /var/spool/cron/student
+> -rw------- 1 student student 25 Apr 22 09:59 /var/spool/cron/student
+> $ sudo cat /var/spool/cron/student
+> 0 10 * * * /tmp/myjob.sh
+
+NOTE: If you don't really want this running every day, printing out messages like:
+
+> Hello I am running /tmp/myjob.sh at Wed Apr 22 10:03:48 CDT 2015
+
+and mailing them to you, you can remove it with:
+
+> $ crontab -r
+
+If the machine is not up at 10 AM on a given day, anacron will run the job at a suitable time.
+
+Help with Syntax (Wikipedia):
+┌───────────── Minute (0 - 59)
+│ ┌───────────── Stunde (0 - 23)
+│ │ ┌───────────── Tag des Monats (1 - 31)
+│ │ │ ┌───────────── Monat (1 - 12)
+│ │ │ │ ┌───────────── Wochentag (0 - 6)
+│ │ │ │ │
+* * * * *  /Pfad/Programmname
+
+Beispielsweise führt folgende Zeile in der Crontab dazu, dass das Programm /bin/prog.sh jeden Samstag (Tag = 6) um 23:45 aufgerufen wird:
+
+45 23 * * 6 /bin/prog.sh
+
+Sleep
+--------------------
+
+sleep NUMBER[SUFFIX]...
+
+where SUFFIX may be:
+
+s for seconds (the default)
+m for minutes
+h for hours
+d for days.
+
+sleep and at are quite different; sleep delays execution for a specific period, while at starts execution at a specific designated later time.
+
+------------------------------------------------------------------------------------------------------------------------------
+Synchronize Directories
+------------------------------------------------------------------------------------------------------------------------------
+
+rsync start Zeilen
+-a Archivmodus (rekursiv, behält Rechte, Zeitstempel, Symlinks usw.)
+-v ausführliche Ausgabe (optional, zeigt, was passiert)
+--delete löscht Dateien im Ziel, die im Quellordner nicht mehr existieren
+--exclude='readme.txt'
+--exclude-from='exclude.txt'
+--progess Prozess anzeigen
+
+(rsync --progress -avrxH  --delete sourcedir destdir)
+
+------------------------------------------------------------------------------------------------------------------------------
+Compressing
+------------------------------------------------------------------------------------------------------------------------------
+
+gzip
+-----------------
+gzip *	Compresses all files in the current directory; each file is compressed and renamed with a .gz extension.
+gzip -r projectX	Compresses all files in the projectX directory, along with all files in all of the directories under projectX.
+gunzip foo	De-compresses foo found in the file foo.gz. Under the hood, the gunzip command is actually the same as gzip –d.
+
+bzip2
+-----------------
+bzip2 probably no longer in use
+bzip2 *	Compresses all of the files in the current directory and replaces each file with a file renamed with a .bz2 extension.
+bunzip2 *.bz2	Decompresses all of the files with an extension of .bz2 in the current directory. Under the hood, bunzip2 is the same as calling bzip2 -d.
+
+xz
+-----------------
+xz *	Compresses all of the files in the current directory and replaces each file with one with a .xz extension.
+xz foo	Compresses foo into foo.xz using the default compression level (-6), and removes foo if compression succeeds.
+xz -dk bar.xz	Decompresses bar.xz into bar and does not remove bar.xz even if decompression is successful.
+xz -dcf a.txt b.txt.xz > abcd.txt	Decompresses a mix of compressed and uncompressed files to standard output, using a single command.
+xz -d *.xz	Decompresses the files compressed using xz.
+
+zip
+-----------------
+zip backup *	Compresses all files in the current directory and places them in the backup.zip.
+zip -r backup.zip ~	Archives your login directory (~) and all files and directories under it in backup.zip.
+unzip backup.zip	Extracts all files in backup.zip and places them in the current directory.
+
+tar
+-----------------
+tar -cvf /tmp/backup.tar /home/student
+tar xvf mydir.tar	Extract all the files in mydir.tar into the mydir directory.
+tar zcvf mydir.tar.gz mydir	Create the archive and compress with gzip.
+tar jcvf mydir.tar.bz2 mydir	Create the archive and compress with bz2.
+tar Jcvf mydir.tar.xz mydir	Create the archive and compress with xz.
+tar xvf mydir.tar.gz	Extract all the files in mydir.tar.gz into the mydir directory.
+NOTE: You do not have to tell tar it is in gzip format.
+
+------------------------------------------------------------------------------------------------------------------------------
+Users
+------------------------------------------------------------------------------------------------------------------------------
+
+To identify the current user, type whoami.
+To list the currently logged-on users, type who.
+
+Giving who the -a option will give more detailed information.
+
+Managing Users
+----------------------
+
+sudo useradd bjmoose ... add user
+-m create homedir
+-c ... comment/fullname
+sudo userdel bjmoose
+--> -r to delete home directory
+
+passwd <usr> ... changing password
+
+Group Users
+----------------------
+
+groupadd <name> ... new group
+groupdel
+groups <usr> ... groups of usr 
+sudo usermod -a -G <group> <usr> ... adding new group
+sudo usermod -G <groups> <usr> ... remaining list of groups (deleting the groups, they are not mentionend because a stands for appending the groupfile of user)
