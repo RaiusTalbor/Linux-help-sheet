@@ -469,6 +469,8 @@ $ sudo systemctl status httpd.service
 Managing Processes
 ------------------------------------------------------------------------------------------------------------------------------
 
+top / htop for memory and CPU usage
+
 kill -SIGKILL <pid> or kill -9 <pid> ... terminating process you own
 
 ps / ps lf ... see processes
