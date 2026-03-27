@@ -597,6 +597,12 @@ Beispielsweise führt folgende Zeile in der Crontab dazu, dass das Programm /bin
 
 45 23 * * 6 /bin/prog.sh
 
+Auch ranges möglich: 2-5
+
+Alternative:
+crontab -e
+--> crontab-Task direkt da rein schreiben
+
 Sleep
 --------------------
 
