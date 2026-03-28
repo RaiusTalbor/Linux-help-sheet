@@ -22,14 +22,18 @@ Reading a file
 Comparing files
 Links to files
 Editors (Nano, VIM, Emacs)
-Creating executable files
+Creating executable files (variables, functions, parameters, if, case, loops, interaction)
+Package Manager APT
 Package Manager RPM
+Creating Debian-Packages
 System Control
 Managing Processes
-Automated Jobs (At, cron, sleep)
+Automated Jobs (At, cron, sleep, Systemd-Units)
 Synchronize Directories
 Compressing (gzip, bzip2, xz, zip, tar)
 Users (Managing Users, group users)
+Permissions
+Network settings
 
 ------------------------------------------------------------------------------------------------------------------------------
 Installation
@@ -54,6 +58,13 @@ strg+L clear screen
 history ... zeigt letzten Befehle
 histroy !-[Zahl] greift auf den [Zahl]-letzten Befehl zu
 
+&& connects to commands:
+>apt update && apt upgrade
+second will only run, when 1 is succesfully terminated
+
+>command1; command2
+first command 1, then command2
+
 ------------------------------------------------------------------------------------------------------------------------------
 More Rights
 ------------------------------------------------------------------------------------------------------------------------------
@@ -75,6 +86,18 @@ show discription and Manual Page
 divided in topics
 
 A given topic may have multiple pages associated with it and there is a default order determining which one is displayed when no options or section number is specified.
+sections: 
+
+1. User commands (both executable and shell programs)
+2. System calls (kernel routines invoked from user space)
+3. Library functions (provided by program libraries)
+4. Special files (such as device files)
+5. File formats (for many configuration files and structure)
+6. Games (bit historical)
+7. Conventions, standards, and miscellaneous (protocols, file systems)
+8. System administration and privileged commands (maintanance tasks)
+9. Linux kernel API
+
 To list all pages on the topic, use the -f option. 
 To list all pages that discuss a specific topic (even if the specified subject is not present in the name), use the –k option.
 
@@ -401,14 +424,124 @@ Creating executable files
 ------------------------------------------------------------------------------------------------------------------------------
 
 Create file first (best practice: .sh)
+--------------------
 
 write
 > #!/bin/bash
-on first line (Verweis zu ausführbaren Befehlen)
+on first line (link to executable commands in system)
 
 and then make it executable:
 > chmod +x test.sh
 (giving permissions to execute)
+
+#comment
+
+Variables
+--------------------
+var='Hello World'
+anothervar=$var                 #!no Spaces between =
+varb=$var' connect'             #--> varb='Hello World connect'
+
+varcommand=$(command)           #output saved in variable
+
+function
+--------------------
+>function fkt {
+>echo "hi"
+>}
+>fkt
+
+parameters
+--------------------
+call parameters
+>$1 $2 $3 [...]
+
+call name of script
+>$0
+
+all parameters
+>$@
+
+call the count of all parameters
+>$#
+
+save parameters in an array
+>args=("$@")
+
+call values in array
+>echo ${args[0]} ${args[1]} ${args[2]}
+
+if-statement
+--------------------
+
+--> see more on man test
+
+!                   #negation
+-eq / =             #equal
+!= / -ne            #not equal
+-ge                 #greater than or equal
+-gt                 #greater than
+-le                 #less than or equal
+-lt                 #less than
+
+-a                  #and
+-o                  #or
+
+if test $var -ne 2; then
+echo "Hello"
+elif [ condition ]; then
+else
+echo "Hi"
+fi
+
+alternative:
+if [ $var -ne 2 ]; then         #!the spaces are nescessary!!!
+echo "Hello"
+else
+echo "Hi"
+fi                              #to finish the if-statement
+
+case
+--------------------
+case $ANSWER in
+
+  y | Y | yes | Yes | YES)
+    echo "Continuing..."
+    ;;
+
+  n | N | no | No | NO)
+    echo "Aborted."
+    exit 1
+    ;;
+
+  *)
+    echo "Invalid input. Please enter y or n."
+    exit 1
+    ;;
+esac                            #to finish the case
+
+loops
+--------------------
+for f in $( ls /etc/ ); do
+echo $f
+done
+
+counter=0
+until [ $counter -gt 10 ]; do
+echo "Der Wert ist: $counter"
+let counter=counter+1
+done
+
+while [ "$x" != "0" ] do 
+echo "Ergebnis: $ergebnis"
+done
+
+interaction
+--------------------
+
+read -p "Bitte geben Sie zwei Integer-Werte ein: " x y
+ergebnis=$(( x * y ))
+echo ergebnis
 
 ------------------------------------------------------------------------------------------------------------------------------
 Package Manager APT
@@ -454,6 +587,46 @@ Get information on package	rpm -qil foo	dpkg --listfiles foo
 Show packages named foo	dnf list "foo"	apt-cache search foo
 Show all available packages	dnf list	apt-cache dumpavail foo
 What package is file part of?	rpm -qf file	dpkg --search file
+
+------------------------------------------------------------------------------------------------------------------------------
+Create Debian-Packages
+------------------------------------------------------------------------------------------------------------------------------
+
+1. Create directory somewhere e.g. helloworld
+
+2. Create subdirectories
+--> these will appeare in target system (not DEBIAN, but rest)!
+(e.g. after installation, the executable file will be under usr/bin)
+usr/bin
+DEBIAN
+
+3. copy sh/programm in helloworld/usr/bin
+!Attention: remove .sh from your executable, otherwise you have to call your programm later as "helloworld.sh" and not "helloworld"
+
+4. Create file "control" under "helloworld/DEBIAN/":
+>Package: helloworld
+>Version: 1.0
+>Section: misc
+>Priority: extra
+>Architecture: all
+>Depends:
+>Installed-Size: 1
+>Maintainer: Me
+>Homepage: abc.abc
+>Description: print ou hello world
+
+--> see more about section under man-pages
+--> priorities: 
+--> Architecture: in generall all, "i386" for 32 Bit, "amd64" for 64 Bit
+--> Depends: other packages the programm needs, call the name comma seperated
+
+5. Build from root-directory (not in folder helloworld, above): 
+>dpkg -b ./helloworld helloworld.deb
+
+6. Install packages: sudo dpkg --install helloworld.deb
+
+7. Execute it: helloworld
+--> if you forgot to remove the .sh, you can execute it as helloworld.sh
 
 ------------------------------------------------------------------------------------------------------------------------------
 System Control
@@ -617,6 +790,53 @@ d for days.
 
 sleep and at are quite different; sleep delays execution for a specific period, while at starts execution at a specific designated later time.
 
+Systemd-Units
+--------------------
+To manage it like a normal process
+see more here: https://devops.aibit.im/de/article/how-to-create-manage-systemd-timer-units
+
+1. Create an executable file (sh) (don't forget to give the permissions: chmod +x <file>)
+
+2. Create Service Unit (best practice: under /etc/systemd/system as .service)
+e.g.:
+>[Unit]
+>Description=prints "Hello world all the time"
+>
+>[Service]
+>Type=oneshot                                       #execute and the terminates
+>ExecStart=/etc/systemd/system/helloworld.sh        #link to file
+>User=abc                                           #optional: no run as root
+>Group=abc                                          #optional: like user
+
+3. Create Timer Unit (best practice: under /etc/systemd/system as .timer)
+e.g.:
+>[Unit]
+>Description=Hello World minütlich ausgeben
+>
+>[Timer]
+>OnBootSec=1min                                     #executes 1min after start
+>OnUnitActiveSec=1min                               #after first run, run 1min later again --> repetation
+>Unit=helloworld.service                            #what should be run
+>
+>[Install]
+>WantedBy=timers.target                             #its a timer unit
+
+Other options for [Timer]
+Persistent=true                                     #as soon as possible after booting
+OnCalendar=daily                                    #when should timer start
+    hourly: every hour
+    weekly: every week (same as Mon *-*-* 00:00:00).
+    Sun *-*-* 10:00: every sunday 10 o'clock.
+    *-*-15 14:30: Am 15. every 15th day in month 14:30 o'clock.
+    Mon..Fri *-*-* 09:00: Mon, Tue, Wen, Thu, Fri 9 o'clock.
+OnUnitInactiveSec                                   #after ... min/sec of inactivation run --> repetation
+AccuracySec                                         #systemd wake up process, so its not perfect 9:00:00 (+/- some seconds); standard: 1min 
+RandomizedDelaySec=10sec                            #random delay till 10 sec
+
+4. Enable the timer unit (sometimes not nescessary): systemctl enable <Timer-unit>
+
+5. Start timer unit: systemctl start <Timer-unit>
+
 ------------------------------------------------------------------------------------------------------------------------------
 Synchronize Directories
 ------------------------------------------------------------------------------------------------------------------------------
@@ -686,10 +906,13 @@ Managing Users
 sudo useradd bjmoose ... add user
 -m create homedir
 -c ... comment/fullname
+
 sudo userdel bjmoose
 --> -r to delete home directory
 
 passwd <usr> ... changing password
+
+id ... shows actual user-id
 
 Group Users
 ----------------------
@@ -699,3 +922,49 @@ groupdel
 groups <usr> ... groups of usr 
 sudo usermod -a -G <group> <usr> ... adding new group
 sudo usermod -G <groups> <usr> ... remaining list of groups (deleting the groups, they are not mentionend because a stands for appending the groupfile of user)
+
+------------------------------------------------------------------------------------------------------------------------------
+Permissions
+------------------------------------------------------------------------------------------------------------------------------
+--> for sudo see section "more rights"
+
+reprented with 9 characters:
+r... read, w... write, x... execute, -... no permission
+first 3: permissions for user
+next 3: permissions for group
+last 3: permissions for all
+
+>rwxrw-r-- --> all permissions for user, read and write for group, read for all
+
+represented with numbers:
+4... read, 2... write, 1... execute
+first number for user
+second for group
+last for all
+
+>764 --> same as above
+
+set permissions:
+chmod +r <filename>     #'-' to take the permissions, w,x for other permissions
+chmod 755 <filename>    #more granular
+
+see permissions with 
+>ls al | grep <filename>
+
+edit owner (optional also the group):
+chown <file> <owner/group>
+
+editing group for file
+chgrp
+
+Alternative: ACL for permission-administration
+
+------------------------------------------------------------------------------------------------------------------------------
+Network settings
+------------------------------------------------------------------------------------------------------------------------------
+
+ip addr show                            #show informations
+ip link set eth0 up                     #set NIC eth0 up (or down)
+ip addr add dev eth0 192.168.0.2/24     #configure NICs
+ip netns add <netOne>                   #set namespace
+iptables -L                             #show ip tables
