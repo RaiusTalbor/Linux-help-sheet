@@ -53,7 +53,8 @@ Basics
 
 echo : gibt es wieder
 
-strg+L clear screen
+strg+L ... clear screen
+clear ... clear screen
 
 history ... zeigt letzten Befehle
 histroy !-[Zahl] greift auf den [Zahl]-letzten Befehl zu
@@ -72,7 +73,7 @@ More Rights
 ------------------------------------------------------------------------------------------------------------------------------
 
 su - substitute user ("Alles")
-sudo - superuser do ("den Befehl")
+sudo - superuser do ("den Befehl"), führt mit Adminrechten aus
 sudo -i (führt jeden Befehl mit sudo aus - keine Best Practice)
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -87,7 +88,8 @@ show discription and Manual Page
 
 divided in topics
 
-A given topic may have multiple pages associated with it and there is a default order determining which one is displayed when no options or section number is specified.
+A given topic may have multiple pages associated with it 
+default order determining which one is displayed when no options or section number is specified.
 sections: 
 
 1. User commands (both executable and shell programs)
@@ -128,7 +130,7 @@ Alias - Redefining and Renaming Commands
 
 alias <name>=<cmd> ... redefine new command
 unalias ... undefine this command
-alias ... shiow aliases
+alias ... show aliases
 To make the alias persistent, just place it in your $HOME/.bashrc file.
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -137,13 +139,14 @@ Reboot tut gut
 
 shutdown now
 reboot
+sudo shutdown -now
 sudo shutdown -h 10:00 "Dies hier ist die Warnung, -h macht die nächste Uhrzeit fest." 
 
 ------------------------------------------------------------------------------------------------------------------------------
 Connect via SSH
 ------------------------------------------------------------------------------------------------------------------------------
 
-ssh bn@dns.com
+ssh benutzername@dns.com
 
 ------------------------------------------------------------------------------------------------------------------------------
 Directory of Output or Input
@@ -207,6 +210,8 @@ mv old new
 -Simply rename a file/dir
 -Move a file to another location, while possibly changing its name at the same time.
 
+info: dd for copy and convert
+
 du -sh - estimate file space usage, summerized human readable
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -214,23 +219,24 @@ Find Directories
 ------------------------------------------------------------------------------------------------------------------------------
 
 locate (findet dateien)
---> kann "update updatedb" nach Änderung benötigen
+--> kann "update updatedb" nach Änderung benötigen
 
-info: dd for copy and convert
-
-find ... recursive #-name (only list files with a certain pattern in their name), -iname (also ignore the case of file names), and -type (which will restrict the results to files of a certain specified type, such as d for directory, l for symbolic link, or f for a regular file, etc.). 
-
-Another good use of find is being able to run commands on the files that match your search criteria. The -exec option is used for this purpose.
+find ... recursive #-name (only list files with a certain pattern in their name), 
+-iname ... ignore the case of file names
+-type ... which will restrict the results to files of a certain specified type
+-d ... for directory
+-l ... for symbolic link
+-f ... for a regular file
+-exec ... run command on files they match the search criteria
+-ok ... ask for permission before execution
 
 To find and remove all files that end with .swp:
 
-$ find -name "*.swp" -exec rm {} ';'
+find -name "*.swp" -exec rm {} ';'
 
 The {} (squiggly brackets) is a placeholder that will be filled with all the file names that result from the find expression, and the preceding command will be run on each one individually.
 
-Please note that you have to end the command with either ';' (including the single-quotes) or \;. Both forms are fine.
-
-One can also use the -ok option, which behaves the same as -exec, except that find will prompt you for permission before executing the command. This makes it a good way to test your results before blindly executing any potentially dangerous commands.
+to end the command with either ';' (including the single-quotes) or \;
 
 ------------------------------------------------------------------------------------------------------------------------------
 Special Linux Directories
@@ -243,6 +249,8 @@ sudo umount /home (NOT uNmount)
 
 df -Th ... information about mounted filesystems
 
+/ ... Wurzel
+
 /root ... Home SU
 /home ... personal files
 /bin ... Binairies requiered by all
@@ -251,11 +259,12 @@ Theorie: not essential: /usr/bin --> but obsolete
 /dev ... mounted devices
 /var ... variable entries like log files, lib, print queries, temps, network things too... (big data won't destroy sys)
 /etc ... sys config files (not user-specific, they are under /usr)
-/boot ... for starting sys
+/boot ... for starting sys; for bootloader
 /lib sometimes additionally /lib64 (common code shared by apps and needet to run) (kernel modules under /lib/modules/<kernel-version-number>)
 /run/media/usr/<name> ... temporarily mouted file sys (historically under /media)
 /mnt ... same, but more nfs, normally not mounted or temporarilly partitions like loopback fs 
 /opt ... Optional application software packages
+/sbin ... important commands for system administration
 /sys ... Virtual pseudo-filesystem giving information about the system and the hardware
 Can be used to alter system parameters and for debugging purposes
 /srv ... Site-specific data served up by the system
@@ -634,7 +643,7 @@ DEBIAN
 System Control
 ------------------------------------------------------------------------------------------------------------------------------
 
-Starting, stopping, restarting a service (using httpd, the Apache web server, as an example) on a currently running system:
+Starting, stopping, restarting a service
 $ sudo systemctl start|stop|restart httpd.service
 
 Enabling or disabling a system service from starting up at system boot:
@@ -668,16 +677,24 @@ load average: w, top, uptime
 Background Jobs
 --------------------
 
-You can put a job in the background by suffixing & to the command, for example: updatedb &.
+put command in background
+suffixing & to the command, e.g. updatedb &
 
-You can use CTRL-Z to suspend a foreground job (i.e., put it in background) and CTRL-C to terminate it. You can always use the bg command to run a suspended process in the background, or the fg command to run a background process in the foreground.
+You can use CTRL-Z to suspend a foreground job (i.e., put it in background) and CTRL-C to terminate it. 
+
+bg ... run a suspended process in the background
+
+fg ... run a background process in the foreground
 
 
 jobs / jobs -l ...shows background jobs
 
 ------------------------------------------------------------------------------------------------------------------------------
 Automated Jobs
-------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+
+At
+--------------------
 
 at now + 2 days ... jetzt in 2 Tagen wird ein CMD ausgeführt
 #task eingeben
@@ -685,8 +702,7 @@ Strg+D to quit
 atq ... check on scheduled job
 atrm <id> ... remove
 
-At
---------------------
+--
 
 Create the file testat.sh containing:
 
@@ -859,48 +875,48 @@ Compressing
 
 gzip
 -----------------
-gzip *	Compresses all files in the current directory; each file is compressed and renamed with a .gz extension.
-gzip -r projectX	Compresses all files in the projectX directory, along with all files in all of the directories under projectX.
-gunzip foo	De-compresses foo found in the file foo.gz. Under the hood, the gunzip command is actually the same as gzip –d.
+gzip *	... Compresses all files in the current directory; each file is compressed and renamed with a .gz extension.
+gzip -r projectX	... Compresses all files in the projectX directory, along with all files in all of the directories under projectX.
+gunzip foo	De-compresses ... foo found in the file foo.gz. Under the hood, the gunzip command is actually the same as gzip –d.
 
 bzip2
 -----------------
 bzip2 probably no longer in use
-bzip2 *	Compresses all of the files in the current directory and replaces each file with a file renamed with a .bz2 extension.
-bunzip2 *.bz2	Decompresses all of the files with an extension of .bz2 in the current directory. Under the hood, bunzip2 is the same as calling bzip2 -d.
+bzip2 *	... Compresses all of the files in the current directory and replaces each file with a file renamed with a .bz2 extension.
+bunzip2 *.bz2	... Decompresses all of the files with an extension of .bz2 in the current directory. Under the hood, bunzip2 is the same as calling bzip2 -d.
 
 xz
 -----------------
-xz *	Compresses all of the files in the current directory and replaces each file with one with a .xz extension.
-xz foo	Compresses foo into foo.xz using the default compression level (-6), and removes foo if compression succeeds.
-xz -dk bar.xz	Decompresses bar.xz into bar and does not remove bar.xz even if decompression is successful.
-xz -dcf a.txt b.txt.xz > abcd.txt	Decompresses a mix of compressed and uncompressed files to standard output, using a single command.
-xz -d *.xz	Decompresses the files compressed using xz.
+xz *	... Compresses all of the files in the current directory and replaces each file with one with a .xz extension.
+xz foo	... Compresses foo into foo.xz using the default compression level (-6), and removes foo if compression succeeds.
+xz -dk bar.xz	... Decompresses bar.xz into bar and does not remove bar.xz even if decompression is successful.
+xz -dcf a.txt b.txt.xz > abcd.txt	... Decompresses a mix of compressed and uncompressed files to standard output, using a single command.
+xz -d *.xz ...	Decompresses the files compressed using xz.
 
 zip
 -----------------
-zip backup *	Compresses all files in the current directory and places them in the backup.zip.
-zip -r backup.zip ~	Archives your login directory (~) and all files and directories under it in backup.zip.
-unzip backup.zip	Extracts all files in backup.zip and places them in the current directory.
+zip backup *	... Compresses all files in the current directory and places them in the backup.zip.
+zip -r backup.zip ~	... Archives your login directory (~) and all files and directories under it in backup.zip.
+unzip backup.zip	... Extracts all files in backup.zip and places them in the current directory.
 
 tar
 -----------------
 tar -cvf /tmp/backup.tar /home/student
-tar xvf mydir.tar	Extract all the files in mydir.tar into the mydir directory.
-tar zcvf mydir.tar.gz mydir	Create the archive and compress with gzip.
-tar jcvf mydir.tar.bz2 mydir	Create the archive and compress with bz2.
-tar Jcvf mydir.tar.xz mydir	Create the archive and compress with xz.
-tar xvf mydir.tar.gz	Extract all the files in mydir.tar.gz into the mydir directory.
+tar xvf mydir.tar	... Extract all the files in mydir.tar into the mydir directory.
+tar zcvf mydir.tar.gz mydir	... Create the archive and compress with gzip.
+tar jcvf mydir.tar.bz2 mydir ...	Create the archive and compress with bz2.
+tar Jcvf mydir.tar.xz mydir	... Create the archive and compress with xz.
+tar xvf mydir.tar.gz ...	Extract all the files in mydir.tar.gz into the mydir directory.
 NOTE: You do not have to tell tar it is in gzip format.
 
 ------------------------------------------------------------------------------------------------------------------------------
 Users
 ------------------------------------------------------------------------------------------------------------------------------
 
-To identify the current user, type whoami.
-To list the currently logged-on users, type who.
+whoami ... identify current user
+who ... identify current logged in users
 
-Giving who the -a option will give more detailed information.
+-a for more information
 
 Managing Users
 ----------------------
