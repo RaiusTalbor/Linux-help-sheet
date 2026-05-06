@@ -582,26 +582,25 @@ Compressing
 
 gzip
 -----------------
-gzip *	Compresses all files in the current directory; each file is compressed and renamed with a .gz extension.
-gzip -r projectX	Compresses all files in the projectX directory, along with all files in all of the directories under projectX.
-gunzip foo	De-compresses foo found in the file foo.gz. Under the hood, the gunzip command is actually the same as gzip –d.
-
+gzip *	... Compresses all files in the current directory; each file is compressed and renamed with a .gz extension.
+gzip -r projectX	... Compresses all files in the projectX directory, along with all files in all of the directories under projectX.
+gunzip foo	De-compresses ... foo found in the file foo.gz. Under the hood, the gunzip command is actually the same as gzip –d.
 
 zip
 -----------------
-zip backup *	Compresses all files in the current directory and places them in the backup.zip.
-zip -r backup.zip ~	Archives your login directory (~) and all files and directories under it in backup.zip.
-unzip backup.zip	Extracts all files in backup.zip and places them in the current directory.
+zip backup *	... Compresses all files in the current directory and places them in the backup.zip.
+zip -r backup.zip ~	... Archives your login directory (~) and all files and directories under it in backup.zip.
+unzip backup.zip	... Extracts all files in backup.zip and places them in the current directory.
 
 tar
 -----------------
 tar -cvf /tmp/backup.tar /home/student
-tar xvf mydir.tar	Extract all the files in mydir.tar into the mydir directory.
-tar zcvf mydir.tar.gz mydir	Create the archive and compress with gzip.
-tar jcvf mydir.tar.bz2 mydir	Create the archive and compress with bz2.
-tar Jcvf mydir.tar.xz mydir	Create the archive and compress with xz.
-tar xvf mydir.tar.gz	Extract all the files in mydir.tar.gz into the mydir directory.
-NOTE: You do not have to tell tar it is in gzip format
+tar xvf mydir.tar	... Extract all the files in mydir.tar into the mydir directory.
+tar zcvf mydir.tar.gz mydir	... Create the archive and compress with gzip.
+tar jcvf mydir.tar.bz2 mydir ...	Create the archive and compress with bz2.
+tar Jcvf mydir.tar.xz mydir	... Create the archive and compress with xz.
+tar xvf mydir.tar.gz ...	Extract all the files in mydir.tar.gz into the mydir directory.
+NOTE: You do not have to tell tar it is in gzip format.
 
 Alternatives xz, bzip2
 
