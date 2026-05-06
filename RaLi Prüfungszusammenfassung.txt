@@ -179,6 +179,8 @@ sudo umount /home (NOT uNmount)
 
 df -Th ... information about mounted filesystems
 
+/ ... Wurzel
+
 /root ... Home SU
 /home ... personal files
 /bin ... Binairies requiered by all
@@ -187,11 +189,12 @@ Theorie: not essential: /usr/bin --> but obsolete
 /dev ... mounted devices
 /var ... variable entries like log files, lib, print queries, temps, network things too... (big data won't destroy sys)
 /etc ... sys config files (not user-specific, they are under /usr)
-/boot ... for starting sys
+/boot ... for starting sys; for bootloader
 /lib sometimes additionally /lib64 (common code shared by apps and needet to run) (kernel modules under /lib/modules/<kernel-version-number>)
 /run/media/usr/<name> ... temporarily mouted file sys (historically under /media)
 /mnt ... same, but more nfs, normally not mounted or temporarilly partitions like loopback fs 
 /opt ... Optional application software packages
+/sbin ... important commands for system administration
 /sys ... Virtual pseudo-filesystem giving information about the system and the hardware
 Can be used to alter system parameters and for debugging purposes
 /srv ... Site-specific data served up by the system
