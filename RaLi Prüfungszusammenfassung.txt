@@ -1,3 +1,731 @@
 Dokument, was sämtliche prüfungsrelevante Syntax zusammenfasst
 Dokument Linux.txt enthält darüber hinaus weitere nützliche Befehle, die für die Arbeit mit Linux-Architekturen hilfreich sein kann. Hier ist nur der explizit prüfungsrelevanter Inhalt aufgeführt, um den Umfang übersichtlicher zu gestalten.
 
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+LINUX
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+
+Table of content:
+----------------------
+Basics
+More Rights
+Find help - Manual Pages
+Reboot tut gut
+Directory of Output or Input
+Navigating through Directory
+Managing Directories
+Find Directories
+Special Linux Directories
+Reading a file
+Links to files
+Editors (Nano, VIM, Emacs)
+Creating executable files (variables, functions, parameters, if, case, loops, interaction)
+Package Manager APT
+Creating Debian-Packages
+System Control
+Managing Processes
+Automated Jobs (cron, Systemd-Units)
+Compressing (gzip, zip, tar)
+Users (Managing Users, group users)
+Permissions
+Network settings (Iptables, Nftables, Interfaces, Network Name Spaces)
+
+------------------------------------------------------------------------------------------------------------------------------
+Basics
+------------------------------------------------------------------------------------------------------------------------------
+
+echo : gibt es wieder
+
+------------------------------------------------------------------------------------------------------------------------------
+More Rights
+------------------------------------------------------------------------------------------------------------------------------
+
+su - substitute user ("Alles")
+sudo - superuser do ("den Befehl")
+sudo -i (führt jeden Befehl mit sudo aus - keine Best Practice)
+
+------------------------------------------------------------------------------------------------------------------------------
+Find help - Manual Pages
+------------------------------------------------------------------------------------------------------------------------------
+
+man
+---------------------
+
+man [package]
+show discription and Manual Page
+
+divided in topics
+
+A given topic may have multiple pages associated with it and there is a default order determining which one is displayed when no options or section number is specified.
+sections: 
+
+1. User commands (both executable and shell programs)
+2. System calls (kernel routines invoked from user space)
+3. Library functions (provided by program libraries)
+4. Special files (such as device files)
+5. File formats (for many configuration files and structure)
+6. Games (bit historical)
+7. Conventions, standards, and miscellaneous (protocols, file systems)
+8. System administration and privileged commands (maintanance tasks)
+9. Linux kernel API
+
+To list all pages on the topic, use the -f option. 
+To list all pages that discuss a specific topic (even if the specified subject is not present in the name), use the –k option.
+
+    man –f generates the same result as typing whatis.
+    man –k generates the same result as typing apropos.
+
+man -f <name> ... all
+man 7 <name> ... specific chapter (7)
+man -a <name> ... all but in order nacheinander wie Buch
+man -k <name> ... shows all they have <name> in their description
+
+------------------------------------------------------------------------------------------------------------------------------
+Reboot tut gut
+------------------------------------------------------------------------------------------------------------------------------
+
+shutdown now
+reboot
+sudo shutdown -now 
+
+------------------------------------------------------------------------------------------------------------------------------
+Directory of Output or Input
+------------------------------------------------------------------------------------------------------------------------------
+
+| : Output is input of another
+
+do_something < input-file
+do_something > output-file
+do_something < input-file > output-file
+> redirect into
+>> append
+
+A special shorthand notation can send anything written to file descriptor 2 (stderr) to the same place as file descriptor 1 (stdout): 2>&1.
+
+$ do_something > all-output-file 2>&1
+
+bash permits an easier syntax for the above:
+
+$ do_something >& all-output-file
+
+do_something 2> error-file #2 wegen standarderror ebenen gedöns
+
+------------------------------------------------------------------------------------------------------------------------------
+Navigating through Directory
+------------------------------------------------------------------------------------------------------------------------------
+
+which - zeigt Pfad einer ausführbaren Datei
+wheris - zeigt Pfad (mächtiger)
+
+pwd	Displays the present working directory
+cd ~ or cd	Change to your home directory; shortcut name is ~ (tilde)
+cd ..	Change to parent directory (..)
+cd -	Change to previous working directory; - (minus)
+. present directory
+
+ls zeigt alle darunterliegenden Ordner, kann filtern z.B. ls *file*
+ls -a listet Dateien noch dazu
+tree zeigt Baum darunter
+tree -d only directories
+df -h #filesystems (in Human readable)
+
+------------------------------------------------------------------------------------------------------------------------------
+Managing Directories
+------------------------------------------------------------------------------------------------------------------------------
+
+touch is used to set the access, change, and edit times of files, as well as to create empty files.
+
+mkdir <path>
+rmdir <path> (delete)
+rm -rf <path> (remove it with everything in it)
+rm -i (remove with Bestätigung)
+cp copy
+
+mv old new
+-Simply rename a file/dir
+-Move a file to another location, while possibly changing its name at the same time.
+
+------------------------------------------------------------------------------------------------------------------------------
+Find Directories
+------------------------------------------------------------------------------------------------------------------------------
+
+locate (findet dateien)
+--> kann "update updatedb" nach Änderung benötigen
+
+find ... recursive #-name (only list files with a certain pattern in their name), -iname (also ignore the case of file names), and -type (which will restrict the results to files of a certain specified type, such as d for directory, l for symbolic link, or f for a regular file, etc.). 
+
+Another good use of find is being able to run commands on the files that match your search criteria. The -exec option is used for this purpose.
+
+To find and remove all files that end with .swp:
+
+$ find -name "*.swp" -exec rm {} ';'
+
+The {} (squiggly brackets) is a placeholder that will be filled with all the file names that result from the find expression, and the preceding command will be run on each one individually.
+
+Please note that you have to end the command with either ';' (including the single-quotes) or \;. Both forms are fine.
+
+One can also use the -ok option, which behaves the same as -exec, except that find will prompt you for permission before executing the command. This makes it a good way to test your results before blindly executing any potentially dangerous commands.
+
+------------------------------------------------------------------------------------------------------------------------------
+Special Linux Directories
+------------------------------------------------------------------------------------------------------------------------------
+
+$ sudo mount /dev/sda5 /home
+will attach the filesystem contained in the disk partition associated with the /dev/sda5 device node into the filesystem tree at the /home mount point
+
+sudo umount /home (NOT uNmount)
+
+df -Th ... information about mounted filesystems
+
+/root ... Home SU
+/home ... personal files
+/bin ... Binairies requiered by all
+/sbin ... Binairies esential for system
+Theorie: not essential: /usr/bin --> but obsolete
+/dev ... mounted devices
+/var ... variable entries like log files, lib, print queries, temps, network things too... (big data won't destroy sys)
+/etc ... sys config files (not user-specific, they are under /usr)
+/boot ... for starting sys
+/lib sometimes additionally /lib64 (common code shared by apps and needet to run) (kernel modules under /lib/modules/<kernel-version-number>)
+/run/media/usr/<name> ... temporarily mouted file sys (historically under /media)
+/mnt ... same, but more nfs, normally not mounted or temporarilly partitions like loopback fs 
+/opt ... Optional application software packages
+/sys ... Virtual pseudo-filesystem giving information about the system and the hardware
+Can be used to alter system parameters and for debugging purposes
+/srv ... Site-specific data served up by the system
+Seldom used
+/tmp ... Temporary files; on some distributions erased across a reboot and/or may actually be a ramdisk in memory
+/usr ... Multi-user applications, utilities and data
+
+------------------------------------------------------------------------------------------------------------------------------
+Reading a file
+------------------------------------------------------------------------------------------------------------------------------
+
+* everything
+? matches any character
+[set]	Matches any character in the set of characters, for example [adf] will match any occurrence of a, d, or f
+[!set]	Matches any character not in the set of characters
+
+grep :  print lines that match patterns
+
+cat: used to type out a file (or combine files).
+tac	Used to look at a file backwards, starting with the last line. (-n mit Zeilen)
+head: used to show the first few lines of a file.
+tail: used to show the last few lines of a file. -20 letzten 20 Zeilen
+
+less #lässt es scrollen wie in man
+
+------------------------------------------------------------------------------------------------------------------------------
+Links to files
+------------------------------------------------------------------------------------------------------------------------------
+
+ln file1 file2 #Suppose that file1 already exists. A hard link, called file2, is created with the command
+
+ln -s file1 file3 #softlink: pointer
+
+------------------------------------------------------------------------------------------------------------------------------
+Editors
+------------------------------------------------------------------------------------------------------------------------------
+
+Nano
+-------------------
+nano <file/filedirectory>
+
+more powerfull alternatives: vim and emacs
+
+------------------------------------------------------------------------------------------------------------------------------
+Creating executable files
+------------------------------------------------------------------------------------------------------------------------------
+
+Create file first (best practice: .sh)
+--------------------
+
+write
+> #!/bin/bash
+on first line (link to executable commands in system)
+
+and then make it executable:
+> chmod +x test.sh
+(giving permissions to execute)
+
+#comment
+
+Variables
+--------------------
+var='Hello World'
+anothervar=$var                 #!no Spaces between =
+varb=$var' connect'             #--> varb='Hello World connect'
+
+varcommand=$(command)           #output saved in variable
+
+function
+--------------------
+>function fkt {
+>echo "hi"
+>}
+>fkt
+
+parameters
+--------------------
+call parameters
+>$1 $2 $3 [...]
+
+call name of script
+>$0
+
+all parameters
+>$@
+
+call the count of all parameters
+>$#
+
+save parameters in an array
+>args=("$@")
+
+call values in array
+>echo ${args[0]} ${args[1]} ${args[2]}
+
+if-statement
+--------------------
+
+--> see more on man test
+
+!                   #negation
+-eq / =             #equal
+!= / -ne            #not equal
+-ge                 #greater than or equal
+-gt                 #greater than
+-le                 #less than or equal
+-lt                 #less than
+
+-a                  #and
+-o                  #or
+
+if test $var -ne 2; then
+echo "Hello"
+elif [ condition ]; then
+else
+echo "Hi"
+fi
+
+alternative:
+if [ $var -ne 2 ]; then         #!the spaces are nescessary!!!
+echo "Hello"
+else
+echo "Hi"
+fi                              #to finish the if-statement
+
+case
+--------------------
+case $ANSWER in
+
+  y | Y | yes | Yes | YES)
+    echo "Continuing..."
+    ;;
+
+  n | N | no | No | NO)
+    echo "Aborted."
+    exit 1
+    ;;
+
+  *)
+    echo "Invalid input. Please enter y or n."
+    exit 1
+    ;;
+esac                            #to finish the case
+
+loops
+--------------------
+for f in $( ls /etc/ ); do
+echo $f
+done
+
+counter=0
+until [ $counter -gt 10 ]; do
+echo "Der Wert ist: $counter"
+let counter=counter+1
+done
+
+while [ "$x" != "0" ] do 
+echo "Ergebnis: $ergebnis"
+done
+
+interaction
+--------------------
+
+read -p "Bitte geben Sie zwei Integer-Werte ein: " x y
+ergebnis=$(( x * y ))
+echo ergebnis
+
+------------------------------------------------------------------------------------------------------------------------------
+Package Manager APT
+------------------------------------------------------------------------------------------------------------------------------
+for Debian, Ubuntu, Mint, ...
+
+apt install [package]
+sudo apt install [Paket-Name-1] [Paket-Name-2] ... [paketname-n]
+apt install [Paket-Name]=[Version] (specific version)
+apt-get install [package]
+apt reinstall [Paket-Name]
+apt-get remove [package]
+apt-get --purge remove [paketname] (entfernt ein Paket und die Konfigurationsdateien)
+apt autoremove (not used packages will be deleted)
+apt purge [Paket-Name] (clean package / correct broken files)
+apt update (holt Updates)
+apt upgrade (Installiert sie)
+sudo apt update && sudo apt upgrade -y (kombiniert und automatisch mit yes beantwortet)
+apt search [search-text] (searching for packages)
+apt show [package-name]
+apt list --installed
+apt list --upgradable
+apt depends [package-name] (show dependencies)
+apt help
+
+Apt und Apt-get unterscheiden sich nur geringfügig
+
+------------------------------------------------------------------------------------------------------------------------------
+Create Debian-Packages
+------------------------------------------------------------------------------------------------------------------------------
+
+1. Create directory somewhere e.g. helloworld
+
+2. Create subdirectories
+--> these will appeare in target system (not DEBIAN, but rest)!
+(e.g. after installation, the executable file will be under usr/bin)
+usr/bin
+DEBIAN
+
+3. copy sh/programm in helloworld/usr/bin
+!Attention: remove .sh from your executable, otherwise you have to call your programm later as "helloworld.sh" and not "helloworld"
+
+4. Create file "control" under "helloworld/DEBIAN/":
+>Package: helloworld
+>Version: 1.0
+>Section: misc
+>Priority: extra
+>Architecture: all
+>Depends:
+>Installed-Size: 1
+>Maintainer: Me
+>Homepage: abc.abc
+>Description: print ou hello world
+
+--> see more about section under man-pages
+--> priorities: 
+--> Architecture: in generall all, "i386" for 32 Bit, "amd64" for 64 Bit
+--> Depends: other packages the programm needs, call the name comma seperated
+
+5. Build from root-directory (not in folder helloworld, above): 
+>dpkg -b ./helloworld helloworld.deb
+
+6. Install packages: sudo dpkg --install helloworld.deb
+
+7. Execute it: helloworld
+--> if you forgot to remove the .sh, you can execute it as helloworld.sh
+
+------------------------------------------------------------------------------------------------------------------------------
+System Control
+------------------------------------------------------------------------------------------------------------------------------
+
+Starting, stopping, restarting a service
+sudo systemctl start|stop|restart httpd.service
+
+Enabling or disabling a system service from starting up at system boot:
+$ sudo systemctl enable|disable httpd.service
+
+Checking on the status of a service:
+$ sudo systemctl status httpd.service
+
+------------------------------------------------------------------------------------------------------------------------------
+Managing Processes
+------------------------------------------------------------------------------------------------------------------------------
+
+top / htop for memory and CPU usage
+
+kill -SIGKILL <pid> or kill -9 <pid> ... terminating process you own
+
+ps / ps lf ... see processes
+renice <number> <pid> ... newer nice number (priority number from -20 to 19, lower better)
+-u ... usernamen
+-ef ... processes in sys in detail
+-eLf ... information of every threade
+ps aux ... processes of all users
+ps axo ... specific attributes
+
+--> if cmd in [], from Kernel
+
+pstree (in {} --> threats)
+
+load average: w, top, uptime
+
+------------------------------------------------------------------------------------------------------------------------------
+Automated Jobs
+------------------------------------------------------------------------------------------------------------------------------
+
+Cron
+--------------------
+
+Set up a cron job to do a simple task every day at 10 AM. Create a file named mycrontab with the following content:
+
+> 0 10 * * * /tmp/myjob.sh
+
+and then create /tmp/myjob.sh containing:
+
+> #!/bin/bash
+> echo Hello I am running $0 at $(date)
+
+and make it executable:
+
+> $ chmod +x /tmp/myjob.sh
+
+Put it in the crontab system with:
+
+> $ crontab mycrontab
+
+and verify it was loaded with:
+
+> $ crontab -l
+
+> 0 10 * * * /tmp/myjob.sh
+> $ sudo ls -l /var/spool/cron/student
+> -rw------- 1 student student 25 Apr 22 09:59 /var/spool/cron/student
+> $ sudo cat /var/spool/cron/student
+> 0 10 * * * /tmp/myjob.sh
+
+NOTE: If you don't really want this running every day, printing out messages like:
+
+> Hello I am running /tmp/myjob.sh at Wed Apr 22 10:03:48 CDT 2015
+
+and mailing them to you, you can remove it with:
+
+> $ crontab -r
+
+If the machine is not up at 10 AM on a given day, anacron will run the job at a suitable time.
+
+Help with Syntax (Wikipedia):
+┌───────────── Minute (0 - 59)
+│ ┌───────────── Stunde (0 - 23)
+│ │ ┌───────────── Tag des Monats (1 - 31)
+│ │ │ ┌───────────── Monat (1 - 12)
+│ │ │ │ ┌───────────── Wochentag (0 - 6)
+│ │ │ │ │
+* * * * *  /Pfad/Programmname
+
+Beispielsweise führt folgende Zeile in der Crontab dazu, dass das Programm /bin/prog.sh jeden Samstag (Tag = 6) um 23:45 aufgerufen wird:
+
+45 23 * * 6 /bin/prog.sh
+
+Auch ranges möglich: 2-5
+
+Alternative:
+crontab -e
+--> crontab-Task direkt da rein schreiben
+
+Systemd-Units
+--------------------
+To manage it like a normal process
+see more here: https://devops.aibit.im/de/article/how-to-create-manage-systemd-timer-units
+
+1. Create an executable file (sh) (don't forget to give the permissions: chmod +x <file>)
+
+2. Create Service Unit (best practice: under /etc/systemd/system as .service)
+e.g.:
+>[Unit]
+>Description=prints "Hello world all the time"
+>
+>[Service]
+>Type=oneshot                                       #execute and the terminates
+>ExecStart=/etc/systemd/system/helloworld.sh        #link to file
+>User=abc                                           #optional: no run as root
+>Group=abc                                          #optional: like user
+
+3. Create Timer Unit (best practice: under /etc/systemd/system as .timer)
+e.g.:
+>[Unit]
+>Description=Hello World minütlich ausgeben
+>
+>[Timer]
+>OnBootSec=1min                                     #executes 1min after start
+>OnUnitActiveSec=1min                               #after first run, run 1min later again --> repetation
+>Unit=helloworld.service                            #what should be run
+>
+>[Install]
+>WantedBy=timers.target                             #its a timer unit
+
+Other options for [Timer]
+Persistent=true                                     #as soon as possible after booting
+OnCalendar=daily                                    #when should timer start
+    hourly: every hour
+    weekly: every week (same as Mon *-*-* 00:00:00).
+    Sun *-*-* 10:00: every sunday 10 o'clock.
+    *-*-15 14:30: Am 15. every 15th day in month 14:30 o'clock.
+    Mon..Fri *-*-* 09:00: Mon, Tue, Wen, Thu, Fri 9 o'clock.
+OnUnitInactiveSec                                   #after ... min/sec of inactivation run --> repetation
+AccuracySec                                         #systemd wake up process, so its not perfect 9:00:00 (+/- some seconds); standard: 1min 
+RandomizedDelaySec=10sec                            #random delay till 10 sec
+
+4. Enable the timer unit (sometimes not nescessary): systemctl enable <Timer-unit>
+
+5. Start timer unit: systemctl start <Timer-unit>
+
+------------------------------------------------------------------------------------------------------------------------------
+Compressing
+------------------------------------------------------------------------------------------------------------------------------
+
+gzip
+-----------------
+gzip *	Compresses all files in the current directory; each file is compressed and renamed with a .gz extension.
+gzip -r projectX	Compresses all files in the projectX directory, along with all files in all of the directories under projectX.
+gunzip foo	De-compresses foo found in the file foo.gz. Under the hood, the gunzip command is actually the same as gzip –d.
+
+
+zip
+-----------------
+zip backup *	Compresses all files in the current directory and places them in the backup.zip.
+zip -r backup.zip ~	Archives your login directory (~) and all files and directories under it in backup.zip.
+unzip backup.zip	Extracts all files in backup.zip and places them in the current directory.
+
+tar
+-----------------
+tar -cvf /tmp/backup.tar /home/student
+tar xvf mydir.tar	Extract all the files in mydir.tar into the mydir directory.
+tar zcvf mydir.tar.gz mydir	Create the archive and compress with gzip.
+tar jcvf mydir.tar.bz2 mydir	Create the archive and compress with bz2.
+tar Jcvf mydir.tar.xz mydir	Create the archive and compress with xz.
+tar xvf mydir.tar.gz	Extract all the files in mydir.tar.gz into the mydir directory.
+NOTE: You do not have to tell tar it is in gzip format
+
+Alternatives xz, bzip2
+
+------------------------------------------------------------------------------------------------------------------------------
+Users
+------------------------------------------------------------------------------------------------------------------------------
+
+To identify the current user, type whoami.
+To list the currently logged-on users, type who.
+
+Giving who the -a option will give more detailed information.
+
+Managing Users
+----------------------
+
+sudo useradd bjmoose ... add user
+-m create homedir
+-c ... comment/fullname
+
+sudo userdel bjmoose
+--> -r to delete home directory
+
+passwd <usr> ... changing password
+
+id ... shows actual user-id
+
+Group Users
+----------------------
+
+groupadd <name> ... new group
+groupdel
+groups <usr> ... groups of usr 
+sudo usermod -a -G <group> <usr> ... adding new group
+sudo usermod -G <groups> <usr> ... remaining list of groups (deleting the groups, they are not mentionend because a stands for appending the groupfile of user)
+
+------------------------------------------------------------------------------------------------------------------------------
+Permissions
+------------------------------------------------------------------------------------------------------------------------------
+--> for sudo see section "more rights"
+
+reprented with 9 characters:
+r... read, w... write, x... execute, -... no permission
+first 3: permissions for user
+next 3: permissions for group
+last 3: permissions for all
+
+>rwxrw-r-- --> all permissions for user, read and write for group, read for all
+
+represented with numbers:
+4... read, 2... write, 1... execute
+first number for user
+second for group
+last for all
+
+>764 --> same as above
+
+set permissions:
+chmod +r <filename>     #'-' to take the permissions, w,x for other permissions
+chmod 755 <filename>    #more granular
+
+see permissions with 
+>ls al | grep <filename>
+
+edit owner (optional also the group):
+chown <file> <owner/group>
+
+editing group for file
+chgrp
+
+Alternative: ACL for permission-administration
+
+------------------------------------------------------------------------------------------------------------------------------
+Network settings
+------------------------------------------------------------------------------------------------------------------------------
+
+iptables
+----------------------
+
+ip addr show                            #show informations
+ip link set eth0 up                     #set NIC eth0 up (or down)
+ip addr add dev eth0 192.168.0.2/24     #configure NICs
+ip netns add <netOne>                   #set namespace
+iptables -L                             #show ip tables
+
+nftables
+----------------------
+
+Regel in nftable "inet filter" hinzufügen, in chain/Stelle input, icmp-Protocol wird fallen gelassen
+nft add rule inet filter input ip protocol icmp drop 
+
+nur SSH-Verbindungen auf Port SSH 
+nft add rule inet filter input tcp dport 22 accept
+nft add rule inet filter input drop
+
+nur pakete an das netz sowieso weiterleiten
+nft add rule inet filter forward ip daddr 192.168.2.0/24 accept
+nft add rule inet filter forward drop
+
+nft add rule inet filter output ip protocol icmp log prefix "ICMP-OUT-"
+
+nft add set inet filter blacklist { type ipv4_addr \; timeout 60s \; }
+nft add rule inet filter input ip saddr @blacklist drop 
+nft add rule inet filter input tcp flags syn limit rate over 10/seconds \ add @blacklist { ip saddr } drop 
+
+Interfaces
+----------------------
+
+/etc/network/interfaces
+-> Konfiguration ohne Netzwerkmanager
+
+activates interface after boot automatically
+auto [interface]
+
+Network Name Spaces
+----------------------
+
+# Anlegen von Network Namespace „netOne“
+ip netns add netOne 
+
+# Anlegen von Network Namespace „netTwo“
+ip netns add netTwo 
+
+# Anlegen eines veth-Paares (virtual Ethernet)
+ip link add veth1 netns netOne type 
+veth peer name veth2 netns netTwo
+
+# Ausführen von /bin/bash im Network
+ip netns exec netOne /bin/bash 
+
+ip address show
+1: lo: <LOOPBACK> mtu 65536 ...
+2: veth1@if2: <BROADCAST,MULTICAST> mtu 1500...
+link/ether 96:97:d1:7c:42:f6 brd ff:ff:ff:ff:ff:ff link-netns netTwo
