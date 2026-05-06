@@ -1,0 +1,3 @@
+Dokument, was sämtliche prüfungsrelevante Syntax zusammenfasst
+Dokument Linux.txt enthält darüber hinaus weitere nützliche Befehle, die für die Arbeit mit Linux-Architekturen hilfreich sein kann. Hier ist nur der explizit prüfungsrelevanter Inhalt aufgeführt, um den Umfang übersichtlicher zu gestalten.
+
