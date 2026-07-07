@@ -7,7 +7,7 @@ LINUX
 Table of content:
 ----------------------
 Installation
-Basics
+Basics (What to do with commands, good to know)
 More Rights
 Find help - Manual Pages (tldr, man, gnome-help)
 Alias - Redefining and Renaming Commands
@@ -51,6 +51,9 @@ https://documentation.ubuntu.com/desktop/en/latest/tutorial/try-ubuntu-desktop/
 Basics
 ------------------------------------------------------------------------------------------------------------------------------
 
+What to do with commands
+---------------------
+
 echo : gibt es wieder
 
 strg+L ... clear screen
@@ -66,7 +69,14 @@ second will only run, when 1 is succesfully terminated
 >command1; command2
 first command 1, then command2
 
+Good to know
+---------------------
+
 dmesg --> show kernel messages
+
+echo $? ... prints out exit code from previous executation
+--> "0" => correct
+--> "127" => error code
 
 ------------------------------------------------------------------------------------------------------------------------------
 More Rights
@@ -219,7 +229,8 @@ Find Directories
 ------------------------------------------------------------------------------------------------------------------------------
 
 locate (findet dateien)
---> kann "update updatedb" nach Änderung benötigen
+--> kann "update updatedb" nach Änderung benötigen
+
 
 find ... recursive #-name (only list files with a certain pattern in their name), 
 -iname ... ignore the case of file names
@@ -691,7 +702,8 @@ jobs / jobs -l ...shows background jobs
 
 ------------------------------------------------------------------------------------------------------------------------------
 Automated Jobs
-------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+
 
 At
 --------------------
@@ -994,15 +1006,18 @@ nftables
 ----------------------
 
 Regel in nftable "inet filter" hinzufügen, in chain/Stelle input, icmp-Protocol wird fallen gelassen
-nft add rule inet filter input ip protocol icmp drop 
+nft add rule inet filter input ip protocol icmp drop 
+
 
 nur SSH-Verbindungen auf Port SSH 
 nft add rule inet filter input tcp dport 22 accept
-nft add rule inet filter input drop
+nft add rule inet filter input drop
+
 
 nur pakete an das netz sowieso weiterleiten
 nft add rule inet filter forward ip daddr 192.168.2.0/24 accept
-nft add rule inet filter forward drop
+nft add rule inet filter forward drop
+
 
 nft add rule inet filter output ip protocol icmp log prefix "ICMP-OUT-"
 
