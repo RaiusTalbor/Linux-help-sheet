@@ -23,17 +23,18 @@ Comparing files
 Links to files
 Editors (Nano, VIM, Emacs)
 Creating executable files (variables, functions, parameters, if, case, loops, interaction)
-Package Manager APT
-Package Manager RPM
+Package Manager APT / DPKG
+Package Manager RPM / DNF
 Creating Debian-Packages
 System Control
 Managing Processes
+Templating Images (bootc)
 Automated Jobs (At, cron, sleep, Systemd-Units)
 Synchronize Directories
 Compressing (gzip, bzip2, xz, zip, tar)
 Users (Managing Users, group users)
 Permissions
-Network settings (Iptables, Nftables, Interfaces, Network Name Spaces)
+Network settings (Iptables, Nftables, Interfaces, NetworkManager - nmcli, Network Name Spaces, Firewall)
 
 ------------------------------------------------------------------------------------------------------------------------------
 Installation
@@ -69,6 +70,11 @@ second will only run, when 1 is succesfully terminated
 >command1; command2
 first command 1, then command2
 
+!! ... previous command
+--> !! --now ... last command with additional argument
+
+^<word1>^<word2> ... run previous command, but replace word1 wird word2
+
 Good to know
 ---------------------
 
@@ -82,10 +88,11 @@ echo $? ... prints out exit code from previous executation
 More Rights
 ------------------------------------------------------------------------------------------------------------------------------
 
-su - substitute user ("Alles")
-su <usr> - switch user
-sudo - superuser do ("den Befehl"), führt mit Adminrechten aus
-sudo -i (führt jeden Befehl mit sudo aus - keine Best Practice)
+su - ... substitute user ("everything"), login as root
+su <usr> ... switch user
+
+sudo <command> ... superuser do, execute as root, but its audited (best practise)
+sudo -i ... creats subshell, every following command is executed as root
 
 ------------------------------------------------------------------------------------------------------------------------------
 Find help - Manual Pages
@@ -199,11 +206,13 @@ popd (nimmt das oberste weg (aktuelles) und geht zum nächsten in Liste, "rückw
 --> speichert nur mit pushd
 --> mit dirs pfad angezeigt
 
-ls zeigt alle darunterliegenden Ordner, kann filtern z.B. ls *file*
-ls -a listet Dateien noch dazu
-tree zeigt Baum darunter
-tree -d only directories
-df -h #filesystems (in Human readable)
+ls ... shows directory below current dir, can filter e.g. ls *file*
+ls -a ... lists all, hidden files additionally
+ls -l ... lists informations
+ls -h ... human readable
+tree ... shows directory-tree
+tree -d ... only directories
+df -h ... filesystems (in Human readable)
 
 ------------------------------------------------------------------------------------------------------------------------------
 Managing Directories
@@ -212,7 +221,7 @@ Managing Directories
 touch is used to set the access, change, and edit times of files, as well as to create empty files.
 
 mkdir <path>
-rmdir <path> (delete)
+rmdir <path> ... delete
 rm -rf <path> (remove it with everything in it)
 rm -i (remove with Bestätigung)
 cp copy
@@ -283,6 +292,7 @@ Can be used to alter system parameters and for debugging purposes
 Seldom used
 /tmp ... Temporary files; on some distributions erased across a reboot and/or may actually be a ramdisk in memory
 /usr ... Multi-user applications, utilities and data
+/run ... for programms, when they have to temporarily store important information; regenerated after every reboot
 
 ------------------------------------------------------------------------------------------------------------------------------
 Reading a file
@@ -572,64 +582,71 @@ ergebnis=$(( x * y ))
 echo ergebnis
 
 ------------------------------------------------------------------------------------------------------------------------------
-Package Manager APT
+Package Manager APT / DPKG
 ------------------------------------------------------------------------------------------------------------------------------
 for Debian, Ubuntu, Mint, ...
 
-apt install [package]
-sudo apt install [Paket-Name-1] [Paket-Name-2] ... [paketname-n]
+apt install [package] (with dependencies)
+dpkg --install <package.deb> (without dependencies)
+apt install [Paket-Name-1] [Paket-Name-2] ... [paketname-n]
 apt install [Paket-Name]=[Version] (specific version)
 apt-get install [package]
 apt reinstall [Paket-Name]
 apt-get remove [package]
+dpkg --remove foo.deb ... package without dependencies
 apt-get --purge remove [paketname] (entfernt ein Paket und die Konfigurationsdateien)
 apt autoremove (not used packages will be deleted)
 apt purge [Paket-Name] (clean package / correct broken files)
-apt update (holt Updates)
+apt update <package> ... serch for updates, special package optional
 apt upgrade (Installiert sie)
-sudo apt update && sudo apt upgrade -y (kombiniert und automatisch mit yes beantwortet)
+apt update && sudo apt upgrade -y (kombiniert und automatisch mit yes beantwortet)
+apt dist-upgrade ... hole system upgrade
+dpkg --install foo.deb ... updates special package without dependencies
 apt search [search-text] (searching for packages)
 apt show [package-name]
+dpkg --listfiles foo ... shows informations about package
 apt list --installed
+dpkg --list 
 apt list --upgradable
+apt-cache search <package>
+dpkg --search file ... What package is file part of?
 apt depends [package-name] (show dependencies)
 apt help
 
 Apt und Apt-get unterscheiden sich nur geringfügig
 
 ------------------------------------------------------------------------------------------------------------------------------
-Package Manager RPM
+Package Manager RPM / DNF
 ------------------------------------------------------------------------------------------------------------------------------
 for Red Hat Enterprise Linux, Fedora, CentOS, AlmaLinux, openSUSE, ...
 
-Operation	rpm	deb
-Install package	rpm -i foo.rpm	dpkg --install foo.deb
-Install package, dependencies	dnf install foo	apt install foo
-Remove package	rpm -e foo.rpm	dpkg --remove foo.deb
-Remove package, dependencies	dnf remove foo	apt autoremove foo
-Update package	rpm -U foo.rpm	dpkg --install foo.deb
-Update package, dependencies	dnf update foo	apt install foo
-Update entire system	dnf update	apt dist-upgrade
-Show all installed packages	rpm -qa or dnf list installed	dpkg --list
-Get information on package	rpm -qil foo	dpkg --listfiles foo
-Show packages named foo	dnf list "foo"	apt-cache search foo
-Show all available packages	dnf list	apt-cache dumpavail foo
-What package is file part of?	rpm -qf file	dpkg --search file
-
-------------------------------------------------------------------------------------------------------------------------------
-Package Manager DNF
-------------------------------------------------------------------------------------------------------------------------------
-
-dnf install <package>
-dnf -y install >package>
+dnf install <package> ... with dependencies
+dnf -y install <package>
+rpm -i foo.rpm ... without dependencies
 dnf list ... list all installed packages
-dnf list <package> ... installed version
+rpm -qa ... same
+dnf list "<package>" ... installed version
+dnf search <package>
 dnf list updates ... show updates
-dnf update ... update packages
-dnf remove <package>
+dnf updateinfo list ... show update information and errata
+dnf updateinfo info <concrete errata> ... show update infos and concrete information and cve
+rpm -qil foo ... information about package
+dnf update <package> ... update packages, special package optional
+rpm -U <package>.rpm ... updates special package without dependencies
+dnf update --security ... only security fixes
+dnf update --sec-severity=Important --sec-severity=Critical ... highest priority
+dnf remove <package> ... with dependencies
 dnf -y remove <package>
+rpm -e <package.rpm> ... without dependencies
 dnf history ... show changes/last commands
 dnf -y history rollback <ID-number> ... change back to state, after ID <number>
+rpm -qf file ... What package is file part of?
+dnf needs-restating -r
+
+Red Hat Errata:
+Red Hat Bug Advisory (RHBA)
+Red Hat Enhancement Advisory (RHEA)
+Red Hat Security Advisory (RHSA)
 
 ------------------------------------------------------------------------------------------------------------------------------
 Create Debian-Packages
@@ -681,6 +698,8 @@ $ sudo systemctl start|stop|restart httpd.service
 Enabling or disabling a system service from starting up at system boot:
 $ sudo systemctl enable|disable httpd.service
 
+$ sudo systemctl enable --now httpd.service ... start and enable at once
+
 Checking on the status of a service:
 $ sudo systemctl status httpd.service
 
@@ -719,8 +738,24 @@ bg ... run a suspended process in the background
 
 fg ... run a background process in the foreground
 
-
 jobs / jobs -l ...shows background jobs
+
+------------------------------------------------------------------------------------------------------------------------------
+Templating Images
+------------------------------------------------------------------------------------------------------------------------------
+
+Bootc
+--------------------
+
+Configuration file for describing OS
+--> switch OS with apps, configurations, settings, …
+
+Like a containerized sys / template of sys, you can exchange it with newer versions
+
+Bootc status … informations about current version, …
+
+Bootc switch <dir> … use this new version of container/OS/sys after reboot
+--> used quay.io in video for dir
 
 ------------------------------------------------------------------------------------------------------------------------------
 Automated Jobs
@@ -962,18 +997,28 @@ sudo useradd bjmoose ... add user
 sudo userdel bjmoose
 --> -r to delete home directory
 
+Information: Every user gets User-ID. Delete a user will delete their number --> ID can be reused (for shared systems and permissions important --> lock user not deleted)
+
 passwd <usr> ... changing password
+passwd -l <usr> ... lock account
+passwd -u <usr> ... unlock account
 
 id ... shows actual user-id
+
+usermod ... modify users
+usermod -s <Shell-Dir> <User> ... changes the shell of a user
 
 Group Users
 ----------------------
 
 groupadd <name> ... new group
+groupmod -n <new> <old> ... rename group
 groupdel
 groups <usr> ... groups of usr 
-sudo usermod -a -G <group> <usr> ... adding new group
+sudo usermod -a -G <group> <usr> ... adding to new group
 sudo usermod -G <groups> <usr> ... remaining list of groups (deleting the groups, they are not mentionend because a stands for appending the groupfile of user)
+
+RHEL: group "wheel" --> standard group who can use sudo-command
 
 ------------------------------------------------------------------------------------------------------------------------------
 Permissions
@@ -984,30 +1029,36 @@ reprented with 9 characters:
 r... read, w... write, x... execute, -... no permission
 first 3: permissions for user
 next 3: permissions for group
-last 3: permissions for all
+last 3: permissions for other (not user AND NOT group)
 
->rwxrw-r-- --> all permissions for user, read and write for group, read for all
+rwxrw-r-- --> all permissions for user, read and write for group, read for other (not user AND NOT group)
 
 represented with numbers:
 4... read, 2... write, 1... execute
 first number for user
 second for group
-last for all
+last for other
 
->764 --> same as above
+764 --> same as above
 
 set permissions:
 chmod +r <filename>     #'-' to take the permissions, w,x for other permissions
 chmod 755 <filename>    #more granular
 
 see permissions with 
->ls al | grep <filename>
+ls -al | grep <filename>
+ls -ld <dir/file>
 
 edit owner (optional also the group):
 chown <file> <owner/group>
+-R ... for all files in this dir
 
 editing group for file
 chgrp
+chown <usr>:<group> <file> ... can leave usr empty
+
+Information: Run a executable code inside a file needs rx, because it has to read the code
+Information: To cd in a dir, need x
 
 Alternative: ACL for permission-administration
 
@@ -1019,10 +1070,13 @@ iptables
 ----------------------
 
 ip addr show                            #show informations
+ip addr show <interface>                #show information of specific interface
 ip link set eth0 up                     #set NIC eth0 up (or down)
 ip addr add dev eth0 192.168.0.2/24     #configure NICs
 ip netns add <netOne>                   #set namespace
 iptables -L                             #show ip tables
+
+ip root show                            #show more
 
 nftables
 ----------------------
@@ -1056,6 +1110,24 @@ Interfaces
 activates interface after boot automatically
 auto [interface]
 
+NetworkManager - nmcli
+----------------------
+
+Profile ... how interface behave
+
+nmcli connection show <profile name> ... profile name optional
+nmcli c s <profile name> ... profile name optional
+
+nmcli connection add <...>
+e.g. nmcli connection add con-name datacenter type ethernet ifname enp7s0 ipv4.method manual ipv4.address "..." ipv4.gateway "..." ipv4.dns "192.168.1.1,1.1.1.1"
+--> create a profile with name datacenter, which is a ethernet-type with the interface enp7s0. Set it manually to the ipv4-addresss "..." and the gateway is this one "...". It will have two dns servers, "..." and "1.1.1.1".
+
+nmcli con del <profile> ... delete profile
+
+/etc/resolv.conf --> show dns servers
+
+--> nmtui ... network manager more intuitive
+
 Network Name Spaces
 ----------------------
 
@@ -1076,3 +1148,16 @@ ip address show
 1: lo: <LOOPBACK> mtu 65536 ...
 2: veth1@if2: <BROADCAST,MULTICAST> mtu 1500...
 link/ether 96:97:d1:7c:42:f6 brd ff:ff:ff:ff:ff:ff link-netns netTwo
+
+Firewall
+----------------------
+Ports represented with service-names like http for port 80 or ssh for port 22
+--> service configurates port
+
+firewall-cmd --add-service http ... opens http-Port
+
+firewall-cmd --add-service httpd --permanent ... opens http-Port and remembers after reboot
+
+firewall-cmd --list-all ... show every rules
+
+firewall-cmd --add-port 8080/tcp ... opens port 8080 for tcp
