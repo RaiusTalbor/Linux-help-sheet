@@ -294,6 +294,11 @@ Reading a file
 [!set]	Matches any character not in the set of characters
 
 grep :  print lines that match patterns
+-r <dir> ... recursively from starting dir + which file (without dir: current location)
+-i ... case-sensitive
+-C<number> ... (e.g. -C1 lines before and after)
+-A ... context after
+-B ... context before
 
 cat: used to type out a file (or combine files).
 tac	Used to look at a file backwards, starting with the last line. (-n mit Zeilen)
@@ -612,6 +617,21 @@ Show all available packages	dnf list	apt-cache dumpavail foo
 What package is file part of?	rpm -qf file	dpkg --search file
 
 ------------------------------------------------------------------------------------------------------------------------------
+Package Manager DNF
+------------------------------------------------------------------------------------------------------------------------------
+
+dnf install <package>
+dnf -y install >package>
+dnf list ... list all installed packages
+dnf list <package> ... installed version
+dnf list updates ... show updates
+dnf update ... update packages
+dnf remove <package>
+dnf -y remove <package>
+dnf history ... show changes/last commands
+dnf -y history rollback <ID-number> ... change back to state, after ID <number>
+
+------------------------------------------------------------------------------------------------------------------------------
 Create Debian-Packages
 ------------------------------------------------------------------------------------------------------------------------------
 
@@ -679,6 +699,7 @@ renice <number> <pid> ... newer nice number (priority number from -20 to 19, low
 -eLf ... information of every threade
 ps aux ... processes of all users
 ps axo ... specific attributes
+ps au --sort=-%mem ... processes sorted by %mem, highest at first (without - ... lowest at first)
 
 --> if cmd in [], from Kernel
 
