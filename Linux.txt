@@ -343,9 +343,9 @@ file <name> ... tests file-type
 Links to files
 ------------------------------------------------------------------------------------------------------------------------------
 
-ln file1 file2 #Suppose that file1 already exists. A hard link, called file2, is created with the command
+ln file1 file2 ... Suppose that file1 already exists. "copy" of file
 
-ln -s file1 file3 #softlink: pointer
+ln -s file1 file3 ... softlink: pointer
 
 ------------------------------------------------------------------------------------------------------------------------------
 Editors
