@@ -28,13 +28,15 @@ Package Manager RPM / DNF
 Creating Debian-Packages
 System Control
 Managing Processes
+Logging (Journalctl)
 Templating Images (bootc)
 Automated Jobs (At, cron, sleep, Systemd-Units)
 Synchronize Directories
 Compressing (gzip, bzip2, xz, zip, tar)
 Users (Managing Users, group users)
 Permissions
-Network settings (Iptables, Nftables, Interfaces, NetworkManager - nmcli, Network Name Spaces, Firewall)
+Network settings (Iptables, Nftables, Interfaces, NetworkManager - nmcli, Network Name Spaces, Firewall, Ports)
+Administration settings
 
 ------------------------------------------------------------------------------------------------------------------------------
 Installation
@@ -238,8 +240,8 @@ du -sh - estimate file space usage, summerized human readable
 Find Directories
 ------------------------------------------------------------------------------------------------------------------------------
 
-locate (findet dateien)
---> kann "update updatedb" nach Änderung benötigen
+locate ... find files
+--> probably "update updatedb" after change for refreshing the db
 
 
 find ... recursive #-name (only list files with a certain pattern in their name), 
@@ -250,10 +252,10 @@ find ... recursive #-name (only list files with a certain pattern in their name)
 -f ... for a regular file
 -exec ... run command on files they match the search criteria
 -ok ... ask for permission before execution
+-size <operation><number> ... +n -> greater than n; - -> less than n; n -> exact n
+--> much more possibilities
 
-To find and remove all files that end with .swp:
-
-find -name "*.swp" -exec rm {} ';'
+find -name "*.swp" -exec rm {} ';' ... To find and remove all files that end with .swp
 
 The {} (squiggly brackets) is a placeholder that will be filled with all the file names that result from the find expression, and the preceding command will be run on each one individually.
 
@@ -298,25 +300,25 @@ Seldom used
 Reading a file
 ------------------------------------------------------------------------------------------------------------------------------
 
+
 * everything
 ? matches any character
 [set]	Matches any character in the set of characters, for example [adf] will match any occurrence of a, d, or f
 [!set]	Matches any character not in the set of characters
 
-grep :  print lines that match patterns
+grep <option> <what I'm searching for> <file> ... print lines that match patterns; pattern can be in ""
 -r <dir> ... recursively from starting dir + which file (without dir: current location)
 -i ... case-sensitive
 -C<number> ... (e.g. -C1 lines before and after)
 -A ... context after
 -B ... context before
+-c ... count matches
 
-cat: used to type out a file (or combine files).
-tac	Used to look at a file backwards, starting with the last line. (-n mit Zeilen)
-head: used to show the first few lines of a file.
-tail: used to show the last few lines of a file. -20 letzten 20 Zeilen
-man: used to view documentation.
-
-less #lässt es scrollen wie in man
+cat ... used to type out a file (or combine files).
+tac ...	used to look at a file backwards, starting with the last line. (-n mit Zeilen)
+head ... used to show the first few lines of a file.
+tail ... used to show the last few lines of a file. -20 letzten 20 Zeilen
+less ... scrollable
 
 ------------------------------------------------------------------------------------------------------------------------------
 Comparing files
@@ -477,7 +479,7 @@ and then make it executable:
 Variables
 --------------------
 var='Hello World'
-anothervar=$var                 #!no Spaces between =
+anothervar=$var                 #! no Spaces between =
 varb=$var' connect'             #--> varb='Hello World connect'
 
 varcommand=$(command)           #output saved in variable
@@ -627,6 +629,7 @@ dnf list ... list all installed packages
 rpm -qa ... same
 dnf list "<package>" ... installed version
 dnf search <package>
+dnf provides <command> ... which packages includes this command?
 dnf list updates ... show updates
 dnf updateinfo list ... show update information and errata
 dnf updateinfo info <concrete errata> ... show update infos and concrete information and cve
@@ -739,6 +742,24 @@ bg ... run a suspended process in the background
 fg ... run a background process in the foreground
 
 jobs / jobs -l ...shows background jobs
+
+------------------------------------------------------------------------------------------------------------------------------
+Logging (Journalctl)
+------------------------------------------------------------------------------------------------------------------------------
+
+journalctl ... show logs
+
+-r ... reverse order
+-n <number> ... limiting logging entries
+-u <system/process/...> ... logs from specifig service (can be combined with -n)
+-p <priority> ... shows only logs with special priority level
+-o verbose ... much more details (-o more possibilities --> see in man)
+-b ... since last boot, you can reference with a number to a specific boot (list-boots) - default: current boot
+--list-boots ... list boots
+-S / -U
+--since "YYYY-MM-DD HH:MM:SS" --until "YYYY-MM-DD HH:MM:SS" --> now, yesterday, tomorrow, -180 (three minutes before)/180 possible
+
+journalctl | grep <word> ... filtering
 
 ------------------------------------------------------------------------------------------------------------------------------
 Templating Images
@@ -975,7 +996,7 @@ tar xvf mydir.tar	... Extract all the files in mydir.tar into the mydir director
 tar zcvf mydir.tar.gz mydir	... Create the archive and compress with gzip.
 tar jcvf mydir.tar.bz2 mydir ...	Create the archive and compress with bz2.
 tar Jcvf mydir.tar.xz mydir	... Create the archive and compress with xz.
-tar xvf mydir.tar.gz ...	Extract all the files in mydir.tar.gz into the mydir directory.
+tar xvf mydir.tar.gz ... Extract all the files in mydir.tar.gz into the mydir directory.
 NOTE: You do not have to tell tar it is in gzip format.
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -1050,7 +1071,7 @@ ls -al | grep <filename>
 ls -ld <dir/file>
 
 edit owner (optional also the group):
-chown <file> <owner/group>
+chown <owner> <file>
 -R ... for all files in this dir
 
 editing group for file
@@ -1059,6 +1080,20 @@ chown <usr>:<group> <file> ... can leave usr empty
 
 Information: Run a executable code inside a file needs rx, because it has to read the code
 Information: To cd in a dir, need x
+
+Sticky Bit: only owner can delete
+represented with t on last digit, T when "other" has no x
+representation with numbers: +1 before usual permissions, e.g. "1755"
+
+Setuid Bit: operates in dir with uid of owner
+represented with s on 3rd digit, S when "user" has no x
+representation with numbers: +4 before usual permissions, e.g. "4755"
+--> e.g. script executable only as root, but normal users should use
+
+Setgid Bit: operates in dir with gid of owner
+represented with s on 6th digit, S when "group" has no x
+representation with numbers: +2 before usual permissions, e.g. "2755"
+--> new files get gid as owner
 
 Alternative: ACL for permission-administration
 
@@ -1076,7 +1111,7 @@ ip addr add dev eth0 192.168.0.2/24     #configure NICs
 ip netns add <netOne>                   #set namespace
 iptables -L                             #show ip tables
 
-ip root show                            #show more
+ip route show                            #show more
 
 nftables
 ----------------------
@@ -1161,3 +1196,27 @@ firewall-cmd --add-service httpd --permanent ... opens http-Port and remembers a
 firewall-cmd --list-all ... show every rules
 
 firewall-cmd --add-port 8080/tcp ... opens port 8080 for tcp
+
+Ports
+----------------------
+possible with netstat
+
+ss ... a list of open non-listening sockets (e.g. TCP/UNIX/UDP) that have established connections
+ss -l ... like ss
+ss -o state established '( dport = :ssh or sport = :ssh )' ... Display all established ssh connections. (same way tcp, udp, http, ...)
+--> man-page
+
+------------------------------------------------------------------------------------------------------------------------------
+Administration settings
+------------------------------------------------------------------------------------------------------------------------------
+
+Change Hostname:
+hostnamectl ... show status (also: hostnamectl status)
+hostnamectl hostname <new hostname> ... new hostname (also with "")
+
+Change time:
+timedatectl ... show status (also: timedatectl status)
+timedatectl set-time YYYY-MM-DD HH:MM:SS ... set time
+list-timezones ... list timezones
+set-timezone <timezone> ... set timezone
+--> more in man timedatectl
