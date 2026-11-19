@@ -57,19 +57,19 @@ Basics
 What to do with commands
 ---------------------
 
-echo : gibt es wieder
+echo ... print text to console
 
 strg+L ... clear screen
 clear ... clear screen
 
-history ... zeigt letzten Befehle
-histroy !-[Zahl] greift auf den [Zahl]-letzten Befehl zu
+history ... show last commands
+histroy !-<number> ... executes command on place <number> in history list
 
-&& connects to commands:
->apt update && apt upgrade
+&& ... connects to commands. e.g.
+apt update && apt upgrade
 second will only run, when 1 is succesfully terminated
 
->command1; command2
+command1; command2
 first command 1, then command2
 
 !! ... previous command
@@ -151,7 +151,8 @@ Alias - Redefining and Renaming Commands
 alias <name>=<cmd> ... redefine new command
 unalias ... undefine this command
 alias ... show aliases
-To make the alias persistent, just place it in your $HOME/.bashrc file.
+
+Information: To make the alias persistent, just place it in your $HOME/.bashrc file.
 
 ------------------------------------------------------------------------------------------------------------------------------
 Reboot tut gut
@@ -160,19 +161,19 @@ Reboot tut gut
 shutdown now
 reboot
 sudo shutdown -now
-sudo shutdown -h 10:00 "Dies hier ist die Warnung, -h macht die nächste Uhrzeit fest." 
+sudo shutdown -h 10:00 "This is the printed warning, -h determines the time." 
 
 ------------------------------------------------------------------------------------------------------------------------------
 Connect via SSH
 ------------------------------------------------------------------------------------------------------------------------------
 
-ssh benutzername@dns.com
+ssh user@example.com
 
 ------------------------------------------------------------------------------------------------------------------------------
 Directory of Output or Input
 ------------------------------------------------------------------------------------------------------------------------------
 
-| : Output is input of another
+| ... Output is input of another
 
 do_something < input-file
 do_something > output-file
@@ -184,57 +185,59 @@ A special shorthand notation can send anything written to file descriptor 2 (std
 
 $ do_something > all-output-file 2>&1
 
-bash permits an easier syntax for the above:
+$ do_something >& all-output-file ... easier syntax for the above
 
-$ do_something >& all-output-file
-
-do_something 2> error-file #2 wegen standarderror ebenen gedöns
+do_something 2> error-file ... 2 because of error-code layers
 
 ------------------------------------------------------------------------------------------------------------------------------
 Navigating through Directory
 ------------------------------------------------------------------------------------------------------------------------------
 
-which - zeigt Pfad einer ausführbaren Datei
-wheris - zeigt Pfad (mächtiger)
+which ... shows path of an executable file
+wheris ... shows path, is more powerful
 
-pwd	Displays the present working directory
-cd ~ or cd	Change to your home directory; shortcut name is ~ (tilde)
-cd ..	Change to parent directory (..)
-cd -	Change to previous working directory; - (minus)
-. present directory
+pwd ...	Displays the present working directory
+cd ...	Change to your home directory; shortcut name is ~ (cd ~)
+cd ..	... Change to parent directory (..)
+cd - ... Change to previous working directory; - (minus)
+. ... present directory
 
-pushd /tmp (geht dorthin und packt es auf Stack, "vorwärts", ohne Pfad tauscht es einfach nur die oberen beiden)
-popd (nimmt das oberste weg (aktuelles) und geht zum nächsten in Liste, "rückwärts")
---> speichert nur mit pushd
---> mit dirs pfad angezeigt
+pushd /tmp ... changes dir and put it on stack, "forward", without argument is switches top two elements
+popd ...  removes the top directory from the stack, and changes to the new top directory
+--> add to stack only with pushd
+dirs ... show stack
 
 ls ... shows directory below current dir, can filter e.g. ls *file*
-ls -a ... lists all, hidden files additionally
-ls -l ... lists informations
-ls -h ... human readable
+-a ... lists all, hidden files additionally
+-l ... lists informations
+-h ... human readable
+
 tree ... shows directory-tree
 tree -d ... only directories
+
 df -h ... filesystems (in Human readable)
+
+lsblk ... show partitioning and drives
 
 ------------------------------------------------------------------------------------------------------------------------------
 Managing Directories
 ------------------------------------------------------------------------------------------------------------------------------
 
-touch is used to set the access, change, and edit times of files, as well as to create empty files.
+touch ... is used to set the access, change, and edit times of files, as well as to create empty files.
 
 mkdir <path>
 rmdir <path> ... delete
-rm -rf <path> (remove it with everything in it)
-rm -i (remove with Bestätigung)
-cp copy
+rm -rf <path> ... remove it with everything in it
+rm -i ... remove with confirmation
 
-mv old new
--Simply rename a file/dir
--Move a file to another location, while possibly changing its name at the same time.
+cp ... copy
 
-info: dd for copy and convert
+mv <old> <new> ... Move a file to another location, while possibly changing its name at the same time
+--> simply rename a file/dir
 
-du -sh - estimate file space usage, summerized human readable
+dd ... for copy and convert
+
+du -sh ... estimate file space usage, summerized human readable
 
 ------------------------------------------------------------------------------------------------------------------------------
 Find Directories
@@ -242,7 +245,6 @@ Find Directories
 
 locate ... find files
 --> probably "update updatedb" after change for refreshing the db
-
 
 find ... recursive #-name (only list files with a certain pattern in their name), 
 -iname ... ignore the case of file names
