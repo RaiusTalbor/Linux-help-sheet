@@ -20,6 +20,7 @@ Find Directories
 Special Linux Directories
 Reading a file
 Comparing files
+Patching files
 Links to files
 Editors (Nano, VIM, Emacs)
 Creating executable files (variables, functions, parameters, if, case, loops, interaction)
@@ -30,7 +31,7 @@ System Control
 Managing Processes
 Logging (Journalctl)
 Templating Images (bootc)
-Automated Jobs (At, cron, sleep, Systemd-Units)
+Automated Jobs (cron, At, sleep, Systemd-Units)
 Synchronize Directories
 Compressing (gzip, bzip2, xz, zip, tar)
 Users (Managing Users, group users)
@@ -41,6 +42,7 @@ Administration settings
 ------------------------------------------------------------------------------------------------------------------------------
 Installation
 ------------------------------------------------------------------------------------------------------------------------------
+
 Choosing right distribution: distrowatch.com , https://distrochooser.de/de
 e.g. Ubuntu, Debian, Mint, Fedora, Red Hat Enterprise Linux (RHEL), Arch, openSUSE, NixOS, Kali Linux, ...
 
@@ -103,13 +105,10 @@ Find help - Manual Pages
 man
 ---------------------
 
-man [package]
-show discription and Manual Page
-
 divided in topics
 
-A given topic may have multiple pages associated with it 
-default order determining which one is displayed when no options or section number is specified.
+a given topic may have multiple pages associated with it 
+default order determining which one is displayed when no options or section number is specified
 sections: 
 
 1. User commands (both executable and shell programs)
@@ -122,23 +121,20 @@ sections:
 8. System administration and privileged commands (maintanance tasks)
 9. Linux kernel API
 
-To list all pages on the topic, use the -f option. 
-To list all pages that discuss a specific topic (even if the specified subject is not present in the name), use the –k option.
+man <package> ... show discription and Manual Page
 
-    man –f generates the same result as typing whatis.
-    man –k generates the same result as typing apropos.
+man -f <package> ... to list all pages on the topic; generates the same result as typing whatis <package>
+man -k <package> ... shows all they have <name> in their description; generates the same result as typing apropos <package>
 
-man -f <name> ... all
-man 7 <name> ... specific chapter (7)
-man -a <name> ... all but in order nacheinander wie Buch
-man -k <name> ... shows all they have <name> in their description
+man 7 <package> ... specific chapter (e.g. 7)
+man -a <package> ... all but in order one by another like a book
 
 tldr
 ---------------------
-Install first (--> Package Management)
 
-tldr [package]
-show discription and most common commands/use cases
+not pre-installed (--> Package Management)
+
+tldr <package> ... show discription and most common commands/use cases
 
 gnome-help
 ---------------------
@@ -178,8 +174,8 @@ Directory of Output or Input
 do_something < input-file
 do_something > output-file
 do_something < input-file > output-file
-> redirect into
->> append
+> ... redirect into
+>> ... append
 
 A special shorthand notation can send anything written to file descriptor 2 (stderr) to the same place as file descriptor 1 (stdout): 2>&1.
 
@@ -267,33 +263,29 @@ to end the command with either ';' (including the single-quotes) or \;
 Special Linux Directories
 ------------------------------------------------------------------------------------------------------------------------------
 
-$ sudo mount /dev/sda5 /home
-will attach the filesystem contained in the disk partition associated with the /dev/sda5 device node into the filesystem tree at the /home mount point
+sudo mount /dev/sda5 /home ... will attach the filesystem contained in the disk partition associated with the /dev/sda5 device node into the filesystem tree at the /home mount point
 
-sudo umount /home (NOT uNmount)
+sudo umount /home ... NOT uNmount
 
 df -Th ... information about mounted filesystems
 
-/ ... Wurzel
+/ ... root-dir
 
-/root ... Home SU
+/root ... Home of root-user
 /home ... personal files
 /bin ... Binairies requiered by all
-/sbin ... Binairies esential for system
-Theorie: not essential: /usr/bin --> but obsolete
+/sbin ... Binairies esential for system; important commands for system administration
+/usr/bin ... not essential --> but obsolete
 /dev ... mounted devices
 /var ... variable entries like log files, lib, print queries, temps, network things too... (big data won't destroy sys)
 /etc ... sys config files (not user-specific, they are under /usr)
 /boot ... for starting sys; for bootloader
-/lib sometimes additionally /lib64 (common code shared by apps and needet to run) (kernel modules under /lib/modules/<kernel-version-number>)
+/lib sometimes additionally /lib64 ... common code shared by apps and needet to run (kernel modules under /lib/modules/<kernel-version-number>)
 /run/media/usr/<name> ... temporarily mouted file sys (historically under /media)
 /mnt ... same, but more nfs, normally not mounted or temporarilly partitions like loopback fs 
 /opt ... Optional application software packages
-/sbin ... important commands for system administration
-/sys ... Virtual pseudo-filesystem giving information about the system and the hardware
-Can be used to alter system parameters and for debugging purposes
+/sys ... Virtual pseudo-filesystem giving information about the system and the hardware; can used to alter system parameters and for debugging
 /srv ... Site-specific data served up by the system
-Seldom used
 /tmp ... Temporary files; on some distributions erased across a reboot and/or may actually be a ramdisk in memory
 /usr ... Multi-user applications, utilities and data
 /run ... for programms, when they have to temporarily store important information; regenerated after every reboot
@@ -302,11 +294,10 @@ Seldom used
 Reading a file
 ------------------------------------------------------------------------------------------------------------------------------
 
-
-* everything
-? matches any character
-[set]	Matches any character in the set of characters, for example [adf] will match any occurrence of a, d, or f
-[!set]	Matches any character not in the set of characters
+* ... everything
+? ... matches any character
+[set]	... matches any character in the set of characters, for example [adf] will match any occurrence of a, d, or f
+[!set] ... matches any character not in the set of characters
 
 grep <option> <what I'm searching for> <file> ... print lines that match patterns; pattern can be in ""
 -r <dir> ... recursively from starting dir + which file (without dir: current location)
@@ -326,20 +317,24 @@ less ... scrollable
 Comparing files
 ------------------------------------------------------------------------------------------------------------------------------
 
-diff <option> <files> ---> see man pages
-    -c	Provides a listing of differences that include three lines of context before and after the lines differing in content
-    -r	Used to recursively compare subdirectories, as well as the current directory
-    -i	Ignore the case of letters
-    -w	Ignore differences in spaces and tabs (white space)
-    -q	Be quiet: only report if files are different without listing the differences
+diff <option> <files> ... compare file line by line
+-c ... Provides a listing of differences that include three lines of context before and after the lines differing in content
+-r ... Used to recursively compare subdirectories, as well as the current directory
+-i ... Ignore the case of letters
+-w ... Ignore differences in spaces and tabs (white space)
+-q ... Be quiet: only report if files are different without listing the differences
+--> more on man-pages
+
 cmp ... for binairies
 diffuse, vimdiff, and meld ... graphical
 
+------------------------------------------------------------------------------------------------------------------------------
+Patching files
+------------------------------------------------------------------------------------------------------------------------------
 
-Patch:
-diff -Nur originalfile newfile > patchfile
-patch -p1 < patchfile / patch originalfile patchfile (first more common because recursive)
-
+diff -original newfile > patchfile
+patch -p1 < patchfile
+patch originalfile patchfile ... first more common because recursive
 
 file <name> ... tests file-type
 
@@ -347,7 +342,7 @@ file <name> ... tests file-type
 Links to files
 ------------------------------------------------------------------------------------------------------------------------------
 
-ln file1 file2 ... Suppose that file1 already exists. "copy" of file
+ln file1 file2 ... suppose that file1 already exists. "copy" of file
 
 ln -s file1 file3 ... softlink: pointer
 
@@ -362,102 +357,104 @@ nano <file/filedirectory>
 VIM
 -------------------
 vim <file/filedirectory>
+vi -r myfile ... Start and edit myfile in recovery mode from a system crash
 
+Modes:
 Command (Default)
 Insert (typing i; for writing)
 Line (Type : to Line editing commands)
 vimtutor ... tutorial
 
-vi myfile	Start the editor and edit myfile
-vi -r myfile	Start and edit myfile in recovery mode from a system crash
-:r file2	Read in file2 and insert at current position
-:w	Write to the file
-:w myfile	Write out to myfile
-:w! file2	Overwrite file2
-:x or :wq	Exit and write out modified file
-:q	Quit
-:q!	Quit even though modifications have not been saved
+Commands:
+:r file2 ... Read in file2 and insert at current position
+:w ... Write to the file
+:w myfile ... Write out to myfile
+:w! file2 ... Overwrite file2
+:x or :wq ...Exit and write out modified file
+:q ... Quit
+:q! ... Quit even though modifications have not been saved
 
-arrow keys	To move up, down, left and right
-j or <ret>	To move one line down
-k	To move one line up
-h or Backspace	To move one character left
-l or Space	To move one character right
-0	To move to beginning of line
-$	To move to end of line
-w	To move to beginning of next word
-:0 or 1G	To move to beginning of file
-:n or nG	To move to line n
-:$ or G	To move to last line in file
-CTRL-F or Page Down	To move forward one page
-CTRL-B or Page Up	To move backward one page
-^l	To refresh and center screen
+How to use:
+arrow keys ... To move up, down, left and right
+j or <ret> ... To move one line down
+k ... To move one line up
+h or Backspace ... To move one character left
+l or Space ... To move one character right
+0 ... To move to beginning of line
+$ ... To move to end of line
+w ... To move to beginning of next word
+:0 or 1G ... To move to beginning of file
+:n or nG ... To move to line n
+:$ or G ... To move to last line in file
+CTRL-F or Page Down ... To move forward one page
+CTRL-B or Page Up ... To move backward one page
+^l ... To refresh and center screen
 
-/pattern	Search forward for pattern
-?pattern	Search backward for pattern
-n	Move to next occurrence of search pattern
-N	Move to previous occurrence of search pattern
+/<pattern> ... Search forward for pattern
+?<pattern> ... Search backward for pattern
+n ... Move to next occurrence of search pattern
+N ... Move to previous occurrence of search pattern
 
-a	Append text after cursor; stop upon Escape key
-A	Append text at end of current line; stop upon Escape key
-i	Insert text before cursor; stop upon Escape key
-I	Insert text at beginning of current line; stop upon Escape key
-o	Start a new line below current line, insert text there; stop upon Escape key
-O	Start a new line above current line, insert text there; stop upon Escape key
-r	Replace character at current position
-R	Replace text starting with current position; stop upon Escape key
-x	Delete character at current position
-Nx	Delete N characters, starting at current position
-dw	Delete the word at the current position
-D	Delete the rest of the current line
-dd	Delete the current line
-Ndd or dNd	Delete N lines
-u	Undo the previous operation
-yy	Yank (copy) the current line and put it in buffer
-Nyy or yNy	Yank (copy) N lines and put it in buffer
-p	Paste at the current position the yanked line or lines from the buffer
-Typing sh command opens an external command shell
-! command within vi (non-interactive)
-! wc % counting words of current textfile (the %)
+a ... Append text after cursor; stop upon Escape key
+A ... Append text at end of current line; stop upon Escape key
+i ... Insert text before cursor; stop upon Escape key
+I ... Insert text at beginning of current line; stop upon Escape key
+o ... Start a new line below current line, insert text there; stop upon Escape key
+O ... Start a new line above current line, insert text there; stop upon Escape key
+r ... Replace character at current position
+R ... Replace text starting with current position; stop upon Escape key
+x ... Delete character at current position
+<N>x ... Delete N characters, starting at current position
+dw ... Delete the word at the current position
+D ... Delete the rest of the current line
+dd ... Delete the current line
+<N>dd or d<N>d ... Delete N lines
+u ... Undo the previous operation
+yy ... Yank (copy) the current line and put it in buffer
+<N>yy or y<N>y ... Yank (copy) N lines and put it in buffer
+p ... Paste at the current position the yanked line or lines from the buffer
+sh  ... opens an external command shell
+! ... command within vi (non-interactive)
+! wc % ... counting words of current textfile (the %)
 
 In Command-mode:
-<number>i<word> Write <word> <number>-times
+<number>i<word> ... Write <word> <number>-times
 f/F<word> find word (number before: third/fourth/...)
 
 emacs
 --------------------
-emacs myfile	Start emacs and edit myfile
-CTRL-x i	Insert prompted for file at current position
-CTRL-x s	Save all files
-CTRL-x CTRL-w	Write to the file giving a new name when prompted
-CTRL-x CTRL-s	Saves the current file
-CTRL-x CTRL-c	Exit after being prompted to save any modified files
-arrow keys	Use the arrow keys for up, down, left and right
-CTRL-n	One line down
-CTRL-p	One line up
-CTRL-f	One character forward/right
-CTRL-b	One character back/left
-CTRL-a	Move to beginning of line
-CTRL-e	Move to end of line
-Meta-f	Move to beginning of next word
-Meta-b	Move back to beginning of preceding word
-Meta-<	Move to beginning of file
-Meta-g-g-n	Move to line n (can also use 'Esc-x Goto-line n')
-Meta->	Move to end of file
-CTRL-v or Page Down	Move forward one page
-Meta-v or Page Up	Move backward one page
-CTRL-l	Refresh and center screen
+emacs myfile ... Start emacs and edit myfile
+CTRL-x i ... Insert prompted for file at current position
+CTRL-x s ... Save all files
+CTRL-x CTRL-w ... Write to the file giving a new name when prompted
+CTRL-x CTRL-s ... Saves the current file
+CTRL-x CTRL-c ... Exit after being prompted to save any modified files
+arrow keys ... Use the arrow keys for up, down, left and right
+CTRL-n ... One line down
+CTRL-p ... One line up
+CTRL-f ... One character forward/right
+CTRL-b ... One character back/left
+CTRL-a ... Move to beginning of line
+CTRL-e ... Move to end of line
+Meta-f ... Move to beginning of next word
+Meta-b ... Move back to beginning of preceding word
+Meta-< ... Move to beginning of file
+Meta-g-g-n ... Move to line n (can also use 'Esc-x Goto-line n')
+Meta-> ... Move to end of file
+CTRL-v or Page Down ... Move forward one page
+Meta-v or Page Up ... Move backward one page
+CTRL-l ... Refresh and center screen
 
-CTRL-s	Search forward for prompted pattern, or for next pattern
-CTRL-r	Search backwards for prompted pattern, or for next pattern
+CTRL-s ... Search forward for prompted pattern, or for next pattern
+CTRL-r ... Search backwards for prompted pattern, or for next pattern
 
-CTRL-o	Insert a blank line
-CTRL-d	Delete character at current position
-CTRL-k	Delete the rest of the current line
-CTRL-_	Undo the previous operation
-CTRL- (space or CTRL-@)	Mark the beginning of the selected region (the end will be at the cursor position)
-CTRL-w	Delete the current marked text and write it to the buffer
-CTRL-y	Insert at current cursor location whatever was most recently deleted
+CTRL-o ... Insert a blank line
+CTRL-d ... Delete character at current position
+CTRL-k ... Delete the rest of the current line
+CTRL-_ ... Undo the previous operation
+CTRL- (space or CTRL-@) ... Mark the beginning of the selected region (the end will be at the cursor position)
+CTRL-w ... Delete the current marked text and write it to the buffer
+CTRL-y ... Insert at current cursor location whatever was most recently deleted
 
 Ctrl-H and then t Tutorial
 
@@ -469,12 +466,10 @@ Create file first (best practice: .sh)
 --------------------
 
 write
-> #!/bin/bash
-on first line (link to executable commands in system)
+#!/bin/bash ... on first line (link to executable commands in system)
 
 and then make it executable:
-> chmod +x test.sh
-(giving permissions to execute)
+chmod +x test.sh ... giving permissions to execute
 
 #comment
 
@@ -488,30 +483,25 @@ varcommand=$(command)           #output saved in variable
 
 function
 --------------------
->function fkt {
->echo "hi"
->}
->fkt
+function fkt {
+echo "hi"
+}
+fkt
 
 parameters
 --------------------
-call parameters
->$1 $2 $3 [...]
 
-call name of script
->$0
+$1 $2 $3 [...] ... call parameters
 
-all parameters
->$@
+$0 ... call name of script
 
-call the count of all parameters
->$#
+$@ ... all parameters
 
-save parameters in an array
->args=("$@")
+$# ... call the count of all parameters
 
-call values in array
->echo ${args[0]} ${args[1]} ${args[2]}
+args=("$@") ... save parameters in an array
+
+echo ${args[0]} ${args[1]} ${args[2]} ... call values in array
 
 if-statement
 --------------------
@@ -545,6 +535,7 @@ fi                              #to finish the if-statement
 
 case
 --------------------
+
 case $ANSWER in
 
   y | Y | yes | Yes | YES)
@@ -564,6 +555,7 @@ esac                            #to finish the case
 
 loops
 --------------------
+
 for f in $( ls /etc/ ); do
 echo $f
 done
@@ -588,40 +580,42 @@ echo ergebnis
 ------------------------------------------------------------------------------------------------------------------------------
 Package Manager APT / DPKG
 ------------------------------------------------------------------------------------------------------------------------------
+
 for Debian, Ubuntu, Mint, ...
 
-apt install [package] (with dependencies)
-dpkg --install <package.deb> (without dependencies)
-apt install [Paket-Name-1] [Paket-Name-2] ... [paketname-n]
-apt install [Paket-Name]=[Version] (specific version)
-apt-get install [package]
-apt reinstall [Paket-Name]
-apt-get remove [package]
+apt install <package> ... with dependencies
+dpkg --install <package.deb> ... without dependencies
+apt install <Paket-Name-1> <Paket-Name-2> ... <paketname-n>
+apt install <Paket-Name>=<Version> ... specific version
+apt-get install <package>
+apt reinstall <Paket-Name>
+apt-get remove <package>
 dpkg --remove foo.deb ... package without dependencies
-apt-get --purge remove [paketname] (entfernt ein Paket und die Konfigurationsdateien)
-apt autoremove (not used packages will be deleted)
-apt purge [Paket-Name] (clean package / correct broken files)
+apt-get --purge remove <paketname> ... removes a package and the configuration files
+apt autoremove ... not used packages will be deleted, e.g. broken dependencies
+apt purge <Paket-Name> ... clean package / correct broken files
 apt update <package> ... serch for updates, special package optional
-apt upgrade (Installiert sie)
-apt update && sudo apt upgrade -y (kombiniert und automatisch mit yes beantwortet)
+apt upgrade ... install updates
+apt update && sudo apt upgrade -y ... combines and confirms automatically
 apt dist-upgrade ... hole system upgrade
 dpkg --install foo.deb ... updates special package without dependencies
-apt search [search-text] (searching for packages)
-apt show [package-name]
+apt search <search-text> ... searching for packages
+apt show <package-name>
 dpkg --listfiles foo ... shows informations about package
 apt list --installed
 dpkg --list 
 apt list --upgradable
 apt-cache search <package>
 dpkg --search file ... What package is file part of?
-apt depends [package-name] (show dependencies)
+apt depends <package-name> ... show dependencies
 apt help
 
-Apt und Apt-get unterscheiden sich nur geringfügig
+Apt and Apt-get not really different
 
 ------------------------------------------------------------------------------------------------------------------------------
 Package Manager RPM / DNF
 ------------------------------------------------------------------------------------------------------------------------------
+
 for Red Hat Enterprise Linux, Fedora, CentOS, AlmaLinux, openSUSE, ...
 
 dnf install <package> ... with dependencies
@@ -669,16 +663,16 @@ DEBIAN
 !Attention: remove .sh from your executable, otherwise you have to call your programm later as "helloworld.sh" and not "helloworld"
 
 4. Create file "control" under "helloworld/DEBIAN/":
->Package: helloworld
->Version: 1.0
->Section: misc
->Priority: extra
->Architecture: all
->Depends:
->Installed-Size: 1
->Maintainer: Me
->Homepage: abc.abc
->Description: print ou hello world
+Package: helloworld
+Version: 1.0
+Section: misc
+Priority: extra
+Architecture: all
+Depends:
+Installed-Size: 1
+Maintainer: Me
+Homepage: abc.abc
+Description: print ou hello world
 
 --> see more about section under man-pages
 --> priorities: 
@@ -686,7 +680,7 @@ DEBIAN
 --> Depends: other packages the programm needs, call the name comma seperated
 
 5. Build from root-directory (not in folder helloworld, above): 
->dpkg -b ./helloworld helloworld.deb
+dpkg -b ./helloworld helloworld.deb
 
 6. Install packages: sudo dpkg --install helloworld.deb
 
@@ -697,22 +691,19 @@ DEBIAN
 System Control
 ------------------------------------------------------------------------------------------------------------------------------
 
-Starting, stopping, restarting a service
-$ sudo systemctl start|stop|restart httpd.service
+sudo systemctl start|stop|restart httpd.service ... Starting, stopping, restarting a service
 
-Enabling or disabling a system service from starting up at system boot:
-$ sudo systemctl enable|disable httpd.service
+sudo systemctl enable|disable httpd.service ... Enabling or disabling a system service from starting up at system boot
 
-$ sudo systemctl enable --now httpd.service ... start and enable at once
+sudo systemctl enable --now httpd.service ... start and enable at once
 
-Checking on the status of a service:
-$ sudo systemctl status httpd.service
+sudo systemctl status httpd.service ... checking on the status of a service:
 
 ------------------------------------------------------------------------------------------------------------------------------
 Managing Processes
 ------------------------------------------------------------------------------------------------------------------------------
 
-top / htop for memory and CPU usage
+top / htop ... for memory and CPU usage
 
 kill -SIGKILL <pid> or kill -9 <pid> ... terminating process you own
 
@@ -734,13 +725,12 @@ load average: w, top, uptime
 Background Jobs
 --------------------
 
-put command in background
-suffixing & to the command, e.g. updatedb &
+<command> & ... e.g. updatedb &; put command in background
 
-You can use CTRL-Z to suspend a foreground job (i.e., put it in background) and CTRL-C to terminate it. 
+CTRL-Z ... to suspend a foreground job (i.e., put it in background)
+CTRL-C ... to terminate it
 
 bg ... run a suspended process in the background
-
 fg ... run a background process in the foreground
 
 jobs / jobs -l ...shows background jobs
@@ -771,26 +761,81 @@ Bootc
 --------------------
 
 Configuration file for describing OS
---> switch OS with apps, configurations, settings, …
+--> switch OS with apps, configurations, settings, ...
 
 Like a containerized sys / template of sys, you can exchange it with newer versions
 
-Bootc status … informations about current version, …
+Bootc status ... informations about current version, ...
 
-Bootc switch <dir> … use this new version of container/OS/sys after reboot
+Bootc switch <dir> ... use this new version of container/OS/sys after reboot
 --> used quay.io in video for dir
 
 ------------------------------------------------------------------------------------------------------------------------------
 Automated Jobs
 ------------------------------------------------------------------------------------------------------------------------------
 
+Cron
+--------------------
+
+1. -- Preparing (Example)
+
+Set up a cron job to do a simple task every day at 10 AM. Create a file named <file> with the following content:
+0 10 * * * /tmp/myjob.sh
+If the machine is not up at 10 AM on a given day, anacron will run the job at a suitable time
+
+and then create /tmp/myjob.sh containing:
+#!/bin/bash
+echo Hello I am running $0 at $(date)
+
+chmod +x /tmp/myjob.sh ... and make it executable
+
+2. -- Loading Cron-Tab
+
+crontab mycrontab ... Put it in the crontab
+
+3. -- Verifying
+
+crontab -l ... and verify it was loaded
+0 10 * * * /tmp/myjob.sh
+
+sudo ls -l /var/spool/cron/student
+-rw------- 1 student student 25 Apr 22 09:59 /var/spool/cron/student
+
+sudo cat /var/spool/cron/student
+0 10 * * * /tmp/myjob.sh
+
+crontab -r ... remove it with
+
+4. -- Scheduling
+
+Help with Syntax (Wikipedia):
+┌───────────── Minute (0 - 59)
+│ ┌───────────── Hour (0 - 23)
+│ │ ┌───────────── Day of Month (1 - 31)
+│ │ │ ┌───────────── Month (1 - 12)
+│ │ │ │ ┌───────────── Day of week (0 - 6)
+│ │ │ │ │
+* * * * *  /path/program
+
+e.g. the following line in crontab will execute the program /bin/prog.sh every saturday ( day = 6 ) on 23:45
+45 23 * * 6 /bin/prog.sh
+
+2-5 ... ranges possible too
+
+5. -- Alternative
+
+crontab -e ... write crontask direct into crontable
 
 At
 --------------------
 
-at now + 2 days ... jetzt in 2 Tagen wird ein CMD ausgeführt
-#task eingeben
-Strg+D to quit
+at starts execution at a specific designated later time
+
+at now + 2 days ... now in 2 days command will be executed
+#type in task
+
+Strg+D ... to quit
+
 atq ... check on scheduled job
 atrm <id> ... remove
 
@@ -798,93 +843,26 @@ atrm <id> ... remove
 
 Create the file testat.sh containing:
 
-> #!/bin/bash
-> date > /tmp/datestamp
+#!/bin/bash
+date > /tmp/datestamp
 
-and then make it executable and queue it up with at:
+chmod +x testat.sh ... make it executable
+at now + 1 minute -f testat.sh ... queue it up with at
 
-> $ chmod +x testat.sh
-> $ at now + 1 minute -f testat.sh
+atq ... You can see if the job is queued up to run
+17      Wed Apr 22 08:55:00 2015 a student
 
-You can see if the job is queued up to run with atq:
-
-> $ atq
-> 17      Wed Apr 22 08:55:00 2015 a student
-
-Make sure the job actually ran:
-
-> $ cat /tmp/datestamp
-> Wed Apr 22 08:55:00 CDT 2015
-
-What happens if you take the /tmp/datestamp out of the command? Hint: Type mail if not prompted to do so!
+cat /tmp/datestamp .. Make sure the job actually ran
+Wed Apr 22 08:55:00 CDT 2015
 
 --
 
 Interactively, it is basically the same procedure. Just queue up the job with:
 
-> $ at now + 1 minute
-> at> date > /tmp/datestamp
-> CTRL-D
-> $ atq
-
-Cron
---------------------
-
-Set up a cron job to do a simple task every day at 10 AM. Create a file named mycrontab with the following content:
-
-> 0 10 * * * /tmp/myjob.sh
-
-and then create /tmp/myjob.sh containing:
-
-> #!/bin/bash
-> echo Hello I am running $0 at $(date)
-
-and make it executable:
-
-> $ chmod +x /tmp/myjob.sh
-
-Put it in the crontab system with:
-
-> $ crontab mycrontab
-
-and verify it was loaded with:
-
-> $ crontab -l
-
-> 0 10 * * * /tmp/myjob.sh
-> $ sudo ls -l /var/spool/cron/student
-> -rw------- 1 student student 25 Apr 22 09:59 /var/spool/cron/student
-> $ sudo cat /var/spool/cron/student
-> 0 10 * * * /tmp/myjob.sh
-
-NOTE: If you don't really want this running every day, printing out messages like:
-
-> Hello I am running /tmp/myjob.sh at Wed Apr 22 10:03:48 CDT 2015
-
-and mailing them to you, you can remove it with:
-
-> $ crontab -r
-
-If the machine is not up at 10 AM on a given day, anacron will run the job at a suitable time.
-
-Help with Syntax (Wikipedia):
-┌───────────── Minute (0 - 59)
-│ ┌───────────── Stunde (0 - 23)
-│ │ ┌───────────── Tag des Monats (1 - 31)
-│ │ │ ┌───────────── Monat (1 - 12)
-│ │ │ │ ┌───────────── Wochentag (0 - 6)
-│ │ │ │ │
-* * * * *  /Pfad/Programmname
-
-Beispielsweise führt folgende Zeile in der Crontab dazu, dass das Programm /bin/prog.sh jeden Samstag (Tag = 6) um 23:45 aufgerufen wird:
-
-45 23 * * 6 /bin/prog.sh
-
-Auch ranges möglich: 2-5
-
-Alternative:
-crontab -e
---> crontab-Task direkt da rein schreiben
+at now + 1 minute
+at> date > /tmp/datestamp
+CTRL-D
+atq
 
 Sleep
 --------------------
@@ -893,43 +871,44 @@ sleep NUMBER[SUFFIX]...
 
 where SUFFIX may be:
 
-s for seconds (the default)
-m for minutes
-h for hours
-d for days.
+s ... for seconds (the default)
+m ... for minutes
+h ... for hours
+d ... for days
 
-sleep and at are quite different; sleep delays execution for a specific period, while at starts execution at a specific designated later time.
+sleep delays execution for a specific period, while at starts execution at a specific designated later time
 
 Systemd-Units
 --------------------
-To manage it like a normal process
+
+to manage it like a normal process
 see more here: https://devops.aibit.im/de/article/how-to-create-manage-systemd-timer-units
 
 1. Create an executable file (sh) (don't forget to give the permissions: chmod +x <file>)
 
 2. Create Service Unit (best practice: under /etc/systemd/system as .service)
 e.g.:
->[Unit]
->Description=prints "Hello world all the time"
->
->[Service]
->Type=oneshot                                       #execute and the terminates
->ExecStart=/etc/systemd/system/helloworld.sh        #link to file
->User=abc                                           #optional: no run as root
->Group=abc                                          #optional: like user
+[Unit]
+Description=prints "Hello world all the time"
+
+[Service]
+Type=oneshot                                       #execute and the terminates
+ExecStart=/etc/systemd/system/helloworld.sh        #link to file
+User=abc                                           #optional: no run as root
+Group=abc                                          #optional: like user
 
 3. Create Timer Unit (best practice: under /etc/systemd/system as .timer)
 e.g.:
->[Unit]
->Description=Hello World minütlich ausgeben
->
->[Timer]
->OnBootSec=1min                                     #executes 1min after start
->OnUnitActiveSec=1min                               #after first run, run 1min later again --> repetation
->Unit=helloworld.service                            #what should be run
->
->[Install]
->WantedBy=timers.target                             #its a timer unit
+[Unit]
+Description=Hello World minütlich ausgeben
+
+[Timer]
+OnBootSec=1min                                     #executes 1min after start
+OnUnitActiveSec=1min                               #after first run, run 1min later again -- repetation
+Unit=helloworld.service                            #what should be run
+
+[Install]
+WantedBy=timers.target                             #its a timer unit
 
 Other options for [Timer]
 Persistent=true                                     #as soon as possible after booting
@@ -951,15 +930,23 @@ RandomizedDelaySec=10sec                            #random delay till 10 sec
 Synchronize Directories
 ------------------------------------------------------------------------------------------------------------------------------
 
-rsync start Zeilen
--a Archivmodus (rekursiv, behält Rechte, Zeitstempel, Symlinks usw.)
--v ausführliche Ausgabe (optional, zeigt, was passiert)
---delete löscht Dateien im Ziel, die im Quellordner nicht mehr existieren
+rsync <source path> <destination path>
+
+rsync <source path> <USER>@<hostname / IP address>:<destination path> ... Local to Remote; user optional
+
+rsync  <USER>@<hostname / IP address>:<source path> <destination path> ... Remote to Local; user optional
+
+-a ... archive mode (recursive, keep permissions, timestamp, Symlinks etc.)
+-v ... verbose, more informations in output
+-u ... skips files that are newer on the destination
+-i ... prints a short change summary for each file
+-n / --dry-run ... simulating transfer without changes (with -v)
+--delete ... deletes files from the destination that no longer exist at the source
 --exclude='readme.txt'
 --exclude-from='exclude.txt'
---progess Prozess anzeigen
+--progess ... shows progress
 
-(rsync --progress -avrxH  --delete sourcedir destdir)
+e.g. rsync --progress -avrxH --delete sourcedir destdir
 
 ------------------------------------------------------------------------------------------------------------------------------
 Compressing
@@ -967,39 +954,45 @@ Compressing
 
 gzip
 -----------------
-gzip *	... Compresses all files in the current directory; each file is compressed and renamed with a .gz extension.
-gzip -r projectX	... Compresses all files in the projectX directory, along with all files in all of the directories under projectX.
-gunzip foo	De-compresses ... foo found in the file foo.gz. Under the hood, the gunzip command is actually the same as gzip –d.
+
+gzip *	... Compresses all files in the current directory; each file is compressed and renamed with a .gz extension
+gzip -r <project>	... Compresses all files in the <project> directory, along with all files in all of the directories under <project>
+gunzip <file> ...	De-compresses <file> found in the file <file>.gz. Under the hood, the gunzip command is actually the same as gzip –d
 
 bzip2
 -----------------
+
 bzip2 probably no longer in use
-bzip2 *	... Compresses all of the files in the current directory and replaces each file with a file renamed with a .bz2 extension.
-bunzip2 *.bz2	... Decompresses all of the files with an extension of .bz2 in the current directory. Under the hood, bunzip2 is the same as calling bzip2 -d.
+bzip2 *	... Compresses all of the files in the current directory and replaces each file with a file renamed with a .bz2 extension
+bunzip2 *.bz2	... Decompresses all of the files with an extension of .bz2 in the current directory. Under the hood, bunzip2 is the same as calling bzip2 -d
 
 xz
 -----------------
-xz *	... Compresses all of the files in the current directory and replaces each file with one with a .xz extension.
-xz foo	... Compresses foo into foo.xz using the default compression level (-6), and removes foo if compression succeeds.
-xz -dk bar.xz	... Decompresses bar.xz into bar and does not remove bar.xz even if decompression is successful.
-xz -dcf a.txt b.txt.xz > abcd.txt	... Decompresses a mix of compressed and uncompressed files to standard output, using a single command.
-xz -d *.xz ...	Decompresses the files compressed using xz.
+
+xz *	... Compresses all of the files in the current directory and replaces each file with one with a .xz extension
+xz <file>	... Compresses <file> into <file>.xz using the default compression level (-6), and removes <file> if compression succeeds
+xz -dk <file>.xz	... Decompresses <file>.xz into <file> and does not remove <file>.xz even if decompression is successful
+xz -dcf <file1>.txt <file2>.txt.xz > <file3>.txt	... Decompresses a mix of compressed and uncompressed files to standard output, using a single command
+xz -d *.xz ...	Decompresses the files compressed using xz
 
 zip
 -----------------
-zip backup *	... Compresses all files in the current directory and places them in the backup.zip.
-zip -r backup.zip ~	... Archives your login directory (~) and all files and directories under it in backup.zip.
-unzip backup.zip	... Extracts all files in backup.zip and places them in the current directory.
+
+zip <backup> *	... Compresses all files in the current directory and places them in the <backup>.zip.
+zip -r <backup>.zip ~	... Archives your login directory (~) and all files and directories under it in <backup>.zip.
+unzip <backup>.zip	... Extracts all files in <backup>.zip and places them in the current directory.
 
 tar
 -----------------
-tar -cvf /tmp/backup.tar /home/student
-tar xvf mydir.tar	... Extract all the files in mydir.tar into the mydir directory.
-tar zcvf mydir.tar.gz mydir	... Create the archive and compress with gzip.
-tar jcvf mydir.tar.bz2 mydir ...	Create the archive and compress with bz2.
-tar Jcvf mydir.tar.xz mydir	... Create the archive and compress with xz.
-tar xvf mydir.tar.gz ... Extract all the files in mydir.tar.gz into the mydir directory.
-NOTE: You do not have to tell tar it is in gzip format.
+
+tar -cvf /tmp/<backup>.tar <source path>
+tar xvf <dir>.tar	... Extract all the files in <dir>.tar into the <dir> directory
+tar zcvf <dir>.tar.gz <dir>	... Create the archive and compress with gzip
+tar jcvf <dir>.tar.bz2 <dir> ...	Create the archive and compress with bz2
+tar Jcvf <dir>.tar.xz <dir>	... Create the archive and compress with xz
+tar xvf <dir>.tar.gz ... Extract all the files in <dir>.tar.gz into the <dir> directory
+
+NOTE: You do not have to tell tar it is in gzip format
 
 ------------------------------------------------------------------------------------------------------------------------------
 Users
@@ -1008,17 +1001,17 @@ Users
 whoami ... identify current user
 who ... identify current logged in users
 
--a for more information
+-a ... for more information
 
 Managing Users
 ----------------------
 
 sudo useradd bjmoose ... add user
--m create homedir
+-m ... create homedir
 -c ... comment/fullname
 
 sudo userdel bjmoose
---> -r to delete home directory
+-r ... to delete home directory
 
 Information: Every user gets User-ID. Delete a user will delete their number --> ID can be reused (for shared systems and permissions important --> lock user not deleted)
 
@@ -1046,6 +1039,7 @@ RHEL: group "wheel" --> standard group who can use sudo-command
 ------------------------------------------------------------------------------------------------------------------------------
 Permissions
 ------------------------------------------------------------------------------------------------------------------------------
+
 --> for sudo see section "more rights"
 
 reprented with 9 characters:
@@ -1065,19 +1059,16 @@ last for other
 764 --> same as above
 
 set permissions:
-chmod +r <filename>     #'-' to take the permissions, w,x for other permissions
-chmod 755 <filename>    #more granular
+chmod +r <filename> ... '-' to take the permissions, w,x for other permissions
+chmod 755 <filename> ... more granular
 
-see permissions with 
-ls -al | grep <filename>
-ls -ld <dir/file>
+ls -al | grep <filename> ... see permissions
+ls -ld <dir/file> ... see permissions
 
-edit owner (optional also the group):
-chown <owner> <file>
+chown <owner> <file> ... edit owner
 -R ... for all files in this dir
 
-editing group for file
-chgrp
+chgrp ... editing group for file
 chown <usr>:<group> <file> ... can leave usr empty
 
 Information: Run a executable code inside a file needs rx, because it has to read the code
@@ -1106,31 +1097,30 @@ Network settings
 iptables
 ----------------------
 
-ip addr show                            #show informations
-ip addr show <interface>                #show information of specific interface
-ip link set eth0 up                     #set NIC eth0 up (or down)
-ip addr add dev eth0 192.168.0.2/24     #configure NICs
-ip netns add <netOne>                   #set namespace
-iptables -L                             #show ip tables
+ip addr show ... show informations
+ip addr show <interface> ... show information of specific interface
 
-ip route show                            #show more
+ip link set eth0 up ... set NIC eth0 up (or down)
+ip addr add dev eth0 192.168.0.2/24 ... configure NICs
+ip netns add <netOne> ... set namespace
+
+iptables -L ... show ip tables
+
+ip route show ... show more
 
 nftables
 ----------------------
 
-Regel in nftable "inet filter" hinzufügen, in chain/Stelle input, icmp-Protocol wird fallen gelassen
+add rule in nftable "inet filter", in chain input, icmp-Protocol will be dropped
 nft add rule inet filter input ip protocol icmp drop 
 
-
-nur SSH-Verbindungen auf Port SSH 
+only ssh on ssh-port 
 nft add rule inet filter input tcp dport 22 accept
 nft add rule inet filter input drop
 
-
-nur pakete an das netz sowieso weiterleiten
+forwarding packages to network
 nft add rule inet filter forward ip daddr 192.168.2.0/24 accept
 nft add rule inet filter forward drop
-
 
 nft add rule inet filter output ip protocol icmp log prefix "ICMP-OUT-"
 
@@ -1141,11 +1131,9 @@ nft add rule inet filter input tcp flags syn limit rate over 10/seconds \ add @b
 Interfaces
 ----------------------
 
-/etc/network/interfaces
--> Konfiguration ohne Netzwerkmanager
+/etc/network/interfaces ... configure without networkmanager
 
-activates interface after boot automatically
-auto [interface]
+auto <interface> ... activates interface after boot automatically
 
 NetworkManager - nmcli
 ----------------------
@@ -1156,8 +1144,8 @@ nmcli connection show <profile name> ... profile name optional
 nmcli c s <profile name> ... profile name optional
 
 nmcli connection add <...>
-e.g. nmcli connection add con-name datacenter type ethernet ifname enp7s0 ipv4.method manual ipv4.address "..." ipv4.gateway "..." ipv4.dns "192.168.1.1,1.1.1.1"
---> create a profile with name datacenter, which is a ethernet-type with the interface enp7s0. Set it manually to the ipv4-addresss "..." and the gateway is this one "...". It will have two dns servers, "..." and "1.1.1.1".
+e.g. nmcli connection add con-name datacenter type ethernet ifname enp7s0 ipv4.method manual ipv4.address <IP> ipv4.gateway <IP> ipv4.dns "<IP>,<IP>"
+--> create a profile with name datacenter, which is a ethernet-type with the interface enp7s0. Set it manually to the ipv4-addresss <IP> and the gateway is this one <IP>. It will have two dns servers, <IP> and <IP>.
 
 nmcli con del <profile> ... delete profile
 
@@ -1168,17 +1156,13 @@ nmcli con del <profile> ... delete profile
 Network Name Spaces
 ----------------------
 
-# Anlegen von Network Namespace „netOne“
-ip netns add netOne 
+ip netns add <name> ... add Network Nmespace 
 
-# Anlegen von Network Namespace „netTwo“
-ip netns add netTwo 
-
-# Anlegen eines veth-Paares (virtual Ethernet)
+add veth-path (virtual ethernet):
 ip link add veth1 netns netOne type 
 veth peer name veth2 netns netTwo
 
-# Ausführen von /bin/bash im Network
+execution of /bin/bash in network
 ip netns exec netOne /bin/bash 
 
 ip address show
