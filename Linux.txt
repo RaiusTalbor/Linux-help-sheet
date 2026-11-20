@@ -1016,7 +1016,10 @@ sudo userdel bjmoose
 Information: Every user gets User-ID. Delete a user will delete their number --> ID can be reused (for shared systems and permissions important --> lock user not deleted)
 
 passwd <usr> ... changing password
-passwd -l <usr> ... lock account
+echo <password> | passwd --stdin <usr> ... for scripts e.g.
+chage -l <usr> ... when last password change --> probably passwd can do it too
+
+passwd -l <usr> ... lock account (root will be able to lock in)
 passwd -u <usr> ... unlock account
 
 id ... shows actual user-id
@@ -1031,8 +1034,11 @@ groupadd <name> ... new group
 groupmod -n <new> <old> ... rename group
 groupdel
 groups <usr> ... groups of usr 
-sudo usermod -a -G <group> <usr> ... adding to new group
-sudo usermod -G <groups> <usr> ... remaining list of groups (deleting the groups, they are not mentionend because a stands for appending the groupfile of user)
+usermod -a -G <group> <usr> ... adding to new group
+usermod -G <groups> <usr> ... remaining list of groups (deleting the groups, they are not mentionend because a stands for appending the groupfile of user)
+gpasswd -d <usr> <group> ... remove a user from this group
+
+see groups in /etc/passwd or /etc/group
 
 RHEL: group "wheel" --> standard group who can use sudo-command
 
