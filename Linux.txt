@@ -61,7 +61,7 @@ What to do with commands
 
 echo ... print text to console
 
-strg+L ... clear screen
+Ctl+L ... clear screen
 clear ... clear screen
 
 history ... show last commands
@@ -88,12 +88,16 @@ echo $? ... prints out exit code from previous executation
 --> "0" => correct
 --> "127" => error code
 
+Tabcompletion, when next word is unique
+Double Tab to see all possible options
+
+Hidden files starts with an .
+
 ------------------------------------------------------------------------------------------------------------------------------
 More Rights
 ------------------------------------------------------------------------------------------------------------------------------
 
 su - ... substitute user ("everything"), login as root
-su <usr> ... switch user
 
 sudo <command> ... superuser do, execute as root, but its audited (best practise)
 sudo -i ... creats subshell, every following command is executed as root
@@ -125,6 +129,7 @@ man <package> ... show discription and Manual Page
 
 man -f <package> ... to list all pages on the topic; generates the same result as typing whatis <package>
 man -k <package> ... shows all they have <name> in their description; generates the same result as typing apropos <package>
+man --regex <regular expression> ... searching with regular expression * ? ...
 
 man 7 <package> ... specific chapter (e.g. 7)
 man -a <package> ... all but in order one by another like a book
@@ -156,8 +161,8 @@ Reboot tut gut
 
 shutdown now
 reboot
-sudo shutdown -now
-sudo shutdown -h 10:00 "This is the printed warning, -h determines the time." 
+shutdown -now
+shutdown -h 10:00 "This is the printed warning, -h determines the time." 
 
 ------------------------------------------------------------------------------------------------------------------------------
 Connect via SSH
@@ -263,9 +268,9 @@ to end the command with either ';' (including the single-quotes) or \;
 Special Linux Directories
 ------------------------------------------------------------------------------------------------------------------------------
 
-sudo mount /dev/sda5 /home ... will attach the filesystem contained in the disk partition associated with the /dev/sda5 device node into the filesystem tree at the /home mount point
+mount /dev/sda5 /home ... will attach the filesystem contained in the disk partition associated with the /dev/sda5 device node into the filesystem tree at the /home mount point
 
-sudo umount /home ... NOT uNmount
+umount /home ... NOT uNmount
 
 df -Th ... information about mounted filesystems
 
@@ -596,7 +601,7 @@ apt autoremove ... not used packages will be deleted, e.g. broken dependencies
 apt purge <Paket-Name> ... clean package / correct broken files
 apt update <package> ... serch for updates, special package optional
 apt upgrade ... install updates
-apt update && sudo apt upgrade -y ... combines and confirms automatically
+apt update && apt upgrade -y ... combines and confirms automatically
 apt dist-upgrade ... hole system upgrade
 dpkg --install foo.deb ... updates special package without dependencies
 apt search <search-text> ... searching for packages
@@ -623,26 +628,49 @@ dnf -y install <package>
 rpm -i foo.rpm ... without dependencies
 dnf list ... list all installed packages
 rpm -qa ... same
+dnf reinstall <package>
+
 dnf list "<package>" ... installed version
 dnf search <package>
 dnf provides <command> ... which packages includes this command?
+rpm -qf <file> ... What package is file part of?
+rpm -ql <packages> ... list files which from this package
+
+rpm -V <package> ... (verify) check package against expected files; attributes:
+S - file Size differs
+M - Mode differs (includes permissions and file type)
+5 - digest (formerly MD5 sum) differs
+D - Device major/minor number mismatch
+L - readLink path mismatch
+U - User ownership differs
+G - Group ownership differs
+T - mTime differs
+P - caPabilities differ
+
+
 dnf list updates ... show updates
 dnf updateinfo list ... show update information and errata
 dnf updateinfo info <concrete errata> ... show update infos and concrete information and cve
-rpm -qil foo ... information about package
 dnf update <package> ... update packages, special package optional
 rpm -U <package>.rpm ... updates special package without dependencies
 dnf update --security ... only security fixes
 dnf update --sec-severity=Important --sec-severity=Critical ... highest priority
+
+rpm -qil foo ... information about package
+rpm -q --scripts httpd ... shows installation script
+rpm -q --changelog <package> ... shows changelog
+
 dnf remove <package> ... with dependencies
 dnf -y remove <package>
 rpm -e <package.rpm> ... without dependencies
+
 dnf history ... show changes/last commands
 dnf -y history rollback <ID-number> ... change back to state, after ID <number>
-rpm -qf file ... What package is file part of?
+
 dnf needs-restating -r
 
-Red Hat Errata:
+Red Hat Errata
+--------------------
 Red Hat Bug Advisory (RHBA)
 Red Hat Enhancement Advisory (RHEA)
 Red Hat Security Advisory (RHSA)
@@ -682,7 +710,7 @@ Description: print ou hello world
 5. Build from root-directory (not in folder helloworld, above): 
 dpkg -b ./helloworld helloworld.deb
 
-6. Install packages: sudo dpkg --install helloworld.deb
+6. Install packages: dpkg --install helloworld.deb
 
 7. Execute it: helloworld
 --> if you forgot to remove the .sh, you can execute it as helloworld.sh
@@ -691,13 +719,13 @@ dpkg -b ./helloworld helloworld.deb
 System Control
 ------------------------------------------------------------------------------------------------------------------------------
 
-sudo systemctl start|stop|restart httpd.service ... Starting, stopping, restarting a service
+systemctl start|stop|restart httpd.service ... Starting, stopping, restarting a service
 
-sudo systemctl enable|disable httpd.service ... Enabling or disabling a system service from starting up at system boot
+systemctl enable|disable httpd.service ... Enabling or disabling a system service from starting up at system boot
 
-sudo systemctl enable --now httpd.service ... start and enable at once
+systemctl enable --now httpd.service ... start and enable at once
 
-sudo systemctl status httpd.service ... checking on the status of a service:
+systemctl status httpd.service ... checking on the status of a service:
 
 ------------------------------------------------------------------------------------------------------------------------------
 Managing Processes
@@ -705,7 +733,9 @@ Managing Processes
 
 top / htop ... for memory and CPU usage
 
-kill -SIGKILL <pid> or kill -9 <pid> ... terminating process you own
+kill <pid> ... terminating process
+-SIGTERM or -15 ... allows the process to terminate hisself
+-SIGKILL or -9 ... immediately stop
 
 ps / ps lf ... see processes
 renice <number> <pid> ... newer nice number (priority number from -20 to 19, lower better)
@@ -715,6 +745,7 @@ renice <number> <pid> ... newer nice number (priority number from -20 to 19, low
 ps aux ... processes of all users
 ps axo ... specific attributes
 ps au --sort=-%mem ... processes sorted by %mem, highest at first (without - ... lowest at first)
+ps aux | head -n1 ; ps aux | grep '[d]d ' ... searching for a specific process; first only the table header, so its human readable, second is search, while the [d]d prevents grep to find hisself
 
 --> if cmd in [], from Kernel
 
@@ -798,10 +829,10 @@ crontab mycrontab ... Put it in the crontab
 crontab -l ... and verify it was loaded
 0 10 * * * /tmp/myjob.sh
 
-sudo ls -l /var/spool/cron/student
+ls -l /var/spool/cron/student
 -rw------- 1 student student 25 Apr 22 09:59 /var/spool/cron/student
 
-sudo cat /var/spool/cron/student
+cat /var/spool/cron/student
 0 10 * * * /tmp/myjob.sh
 
 crontab -r ... remove it with
@@ -1003,14 +1034,20 @@ who ... identify current logged in users
 
 -a ... for more information
 
+su <usr> ... switch user
+su - <usr> ... switch user and start in his/her home dir
+su -login <usr> ... same like su - <usr>
+
+--> exit or Ctl+D ... logout
+
 Managing Users
 ----------------------
 
-sudo useradd bjmoose ... add user
+useradd bjmoose ... add user
 -m ... create homedir
 -c ... comment/fullname
 
-sudo userdel bjmoose
+userdel bjmoose
 -r ... to delete home directory
 
 Information: Every user gets User-ID. Delete a user will delete their number --> ID can be reused (for shared systems and permissions important --> lock user not deleted)
@@ -1151,21 +1188,31 @@ Interfaces
 
 auto <interface> ... activates interface after boot automatically
 
-NetworkManager - nmcli
+NetworkManager
 ----------------------
 
 Profile ... how interface behave
+
+nmcli device ... show hardware
+
+nmstatectl show <interface> ... show configuration of interface
+
+/etc/resolv.conf --> show dns servers
 
 nmcli connection show <profile name> ... profile name optional
 nmcli c s <profile name> ... profile name optional
 
 nmcli connection add <...>
 e.g. nmcli connection add con-name datacenter type ethernet ifname enp7s0 ipv4.method manual ipv4.address <IP> ipv4.gateway <IP> ipv4.dns "<IP>,<IP>"
---> create a profile with name datacenter, which is a ethernet-type with the interface enp7s0. Set it manually to the ipv4-addresss <IP> and the gateway is this one <IP>. It will have two dns servers, <IP> and <IP>.
+--> create a profile with name datacenter, which is a ethernet-type with the interface enp7s0. Set it manually to the ipv4-addresss <IP> and the gateway is this one <IP>. It will have two dns servers, <IP> and <IP>. Default Subnet-mask: 32
+
+nmcli con modify <...>
+e.g. nmcli con modify ethernet1 ipv4.addresses <IP>
+--> same way like above
+
+nmcli c up <profile name> ... bring up connection, can also be interface; don't forget when modified!
 
 nmcli con del <profile> ... delete profile
-
-/etc/resolv.conf --> show dns servers
 
 --> nmtui ... network manager more intuitive
 
@@ -1217,8 +1264,13 @@ hostnamectl ... show status (also: hostnamectl status)
 hostnamectl hostname <new hostname> ... new hostname (also with "")
 
 Change time:
+date ... show actual date and time
 timedatectl ... show status (also: timedatectl status)
 timedatectl set-time YYYY-MM-DD HH:MM:SS ... set time
 list-timezones ... list timezones
 set-timezone <timezone> ... set timezone
 --> more in man timedatectl
+
+Time Convertion:
+date -d "Dec 12 2014 15:00:00" +%s ... to epoch time
+date --date @1418414400 ... from epoch time
