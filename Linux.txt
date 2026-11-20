@@ -1059,9 +1059,11 @@ last for other
 764 --> same as above
 
 set permissions:
-chmod +r <filename> ... '-' to take the permissions, w,x for other permissions
+chmod +r <filename> ... '-' to take the permissions, '=' exact this permissions, w,x for other permissions
+chmod o+rx ... give others the permission to read and execute
 chmod 755 <filename> ... more granular
 
+ls -l <file/dir>
 ls -al | grep <filename> ... see permissions
 ls -ld <dir/file> ... see permissions
 
@@ -1087,6 +1089,14 @@ Setgid Bit: operates in dir with gid of owner
 represented with s on 6th digit, S when "group" has no x
 representation with numbers: +2 before usual permissions, e.g. "2755"
 --> new files get gid as owner
+
+Finding Permission
+----------------------
+
+find -perm 755 ... files with exact this permission
+find -perm -755 ... this or more permissions
+
+find -perm -755 -type f -exec chmod 600 {} \; ... every founded file --> change permission to 600
 
 Alternative: ACL for permission-administration
 
