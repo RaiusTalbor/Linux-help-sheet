@@ -38,6 +38,8 @@ Users (Managing Users, group users)
 Permissions
 Network settings (Iptables, Nftables, Interfaces, NetworkManager - nmcli, Network Name Spaces, Firewall, Ports)
 Administration settings
+Managing Storage (Basics, Mounting, file systems, Creating partitions)
+Logical Volume Manager (LVM)
 
 ------------------------------------------------------------------------------------------------------------------------------
 Installation
@@ -210,7 +212,7 @@ dirs ... show stack
 
 ls ... shows directory below current dir, can filter e.g. ls *file*
 -a ... lists all, hidden files additionally
--l ... lists informations
+-l ... lists information
 -h ... human readable
 
 tree ... shows directory-tree
@@ -268,12 +270,6 @@ to end the command with either ';' (including the single-quotes) or \;
 Special Linux Directories
 ------------------------------------------------------------------------------------------------------------------------------
 
-mount /dev/sda5 /home ... will attach the filesystem contained in the disk partition associated with the /dev/sda5 device node into the filesystem tree at the /home mount point
-
-umount /home ... NOT uNmount
-
-df -Th ... information about mounted filesystems
-
 / ... root-dir
 
 /root ... Home of root-user
@@ -294,6 +290,8 @@ df -Th ... information about mounted filesystems
 /tmp ... Temporary files; on some distributions erased across a reboot and/or may actually be a ramdisk in memory
 /usr ... Multi-user applications, utilities and data
 /run ... for programms, when they have to temporarily store important information; regenerated after every reboot
+
+Information: mounting other devices, ... --> Managing Storage
 
 ------------------------------------------------------------------------------------------------------------------------------
 Reading a file
@@ -606,7 +604,7 @@ apt dist-upgrade ... hole system upgrade
 dpkg --install foo.deb ... updates special package without dependencies
 apt search <search-text> ... searching for packages
 apt show <package-name>
-dpkg --listfiles foo ... shows informations about package
+dpkg --listfiles foo ... shows information about package
 apt list --installed
 dpkg --list 
 apt list --upgradable
@@ -781,8 +779,10 @@ journalctl ... show logs
 --list-boots ... list boots
 -S / -U
 --since "YYYY-MM-DD HH:MM:SS" --until "YYYY-MM-DD HH:MM:SS" --> now, yesterday, tomorrow, -180 (three minutes before)/180 possible
+-k ... kernel-information (hardware issues)
 
 journalctl | grep <word> ... filtering
+journalctl | tail ... last entries
 
 ------------------------------------------------------------------------------------------------------------------------------
 Templating Images
@@ -796,7 +796,7 @@ Configuration file for describing OS
 
 Like a containerized sys / template of sys, you can exchange it with newer versions
 
-Bootc status ... informations about current version, ...
+Bootc status ... information about current version, ...
 
 Bootc switch <dir> ... use this new version of container/OS/sys after reboot
 --> used quay.io in video for dir
@@ -968,7 +968,7 @@ rsync <source path> <USER>@<hostname / IP address>:<destination path> ... Local 
 rsync  <USER>@<hostname / IP address>:<source path> <destination path> ... Remote to Local; user optional
 
 -a ... archive mode (recursive, keep permissions, timestamp, Symlinks etc.)
--v ... verbose, more informations in output
+-v ... verbose, more information in output
 -u ... skips files that are newer on the destination
 -i ... prints a short change summary for each file
 -n / --dry-run ... simulating transfer without changes (with -v)
@@ -1150,7 +1150,7 @@ Network settings
 iptables
 ----------------------
 
-ip addr show ... show informations
+ip addr show ... show information
 ip addr show <interface> ... show information of specific interface
 
 ip link set eth0 up ... set NIC eth0 up (or down)
@@ -1274,3 +1274,201 @@ set-timezone <timezone> ... set timezone
 Time Convertion:
 date -d "Dec 12 2014 15:00:00" +%s ... to epoch time
 date --date @1418414400 ... from epoch time
+
+------------------------------------------------------------------------------------------------------------------------------
+Managing Storage
+------------------------------------------------------------------------------------------------------------------------------
+
+Basics
+----------------------
+
+lsblk ... shows devices, partitions and mountpoints (most mentioned as "device")
+-f ... shows file system and UUID
+
+df ... information about file system space usage
+-h ... human readable
+-T ... print type
+df <mountpoint> ... shows only mountpoint
+
+Mounting
+----------------------
+
+mount <device> <mountpoint> ... will attach the filesystem contained in the disk partition associated with the <device>, e.g. /dev/sda5, device node into the filesystem tree at the mount point (makes a file system in this directory)
+Information: Mountpoints typically under /mnt --> create a dir, e.g. /mnt/ssd_backup !
+Information: mounted device have to have file system
+-a ... mount all --> /etc/fstab
+
+umount <mountpoint> ... NOT uNmount
+
+findmnt <mountpoint> ... shows mounted device
+
+fstab
+----------------------
+
+Making mounting permanent
+--> man fstab !
+
+write it in /etc/fstab
+<Device identification>   <mountpoint>   <fs type>   <options, often "defaults">   <dump, often "0">   <fsck>
+
+device identification:
+often UUID, often path is not stable!
+blkid <device> ... device path (/dev), have to have file system (!), when no device given: every device will shown
+Information: for LV path is stable because of mapper (--> LVM)
+
+options:
+often "defaults"
+sometimes ro (read.only), noexec (no execute), _detdev (network device)
+
+fsck: check fs if there are any errors (in this order)
+for xfs / often default: 0
+when root and ext4: 1
+for any other file system (often ext4): 2
+
+swap: type=swap, defaults 0 0
+
+systemctl daemon-reload ... when failure, systemd don't know the mountpoint
+
+Attention: Don't test it with a reboot (could go into safety mode)!
+- umount device
+- test it with mount -a
+- reboot system, when no failure, control with df
+
+Directory Information (Mounting)
+----------------------
+
+partition sda is very often your root-sys!
+other devices often sdb, sdc, ... ; sda2, sda3, ... numbers other partitions on device
+not stable, after reboot new mapping possible!
+
+--> 
+
+most devices under /dev --> Hardware is always there!
+Troubleshooting, when device is not under /dev:
+- lsblk --> device listed?
+- Hardware issue?
+- journalctl -k for kernel errors
+
+File Systems
+----------------------
+
+mkfs <device> ... create a file system on device (mountpoint), usually for hard disks; default filesystem ext2
+-t ... specifies filesystem; e.g. ext2, ext4, xfs
+
+mkfs.xfs <device> ... short version of mkfs -t xfs <device>
+
+ext4 ... default in Debian, Ubuntu, Mint; default developed with Linux-Kernel
+xfs ... default in Red Hat, Fedora, NAS-Devices ; higher performance, cannot made smaller, no recover for removed files
+btrfs ... Copy-on-Write-System with Snapshots (sometimes Nextcloud)
+
+ntfs ... modern Windows
+
+FAT32 ... old USB
+exFAT ... modern USB
+
+apfs ... Apple Devices
+
+Information: 
+Ceph ... distributed file system (Proxmox)
+NFS ... Network File System
+SMB ... Server Message Block
+
+How to attach an empty storage:
+- create a file system
+- create a mountpoint, e.g. /mnt/ssd_backup
+- mount device
+- now usable
+
+Creating partitions
+----------------------
+
+fdisk <device> ... interactive, device has to be free
+
+parted -l ... show connected devices
+parted <device> mklabel gpt ... create partitiontable
+parted <device> mkpart <name> <start> <end> ... name or type (for GPT name, for MBR type)
+--> start, e.g. 1MiB (first partition recommended starts on 1MiB)
+--> end, e.g. 1GiB (not the size!), 66% --> till 66% of disk
+
+parted rm <device> <partition number> ... remove Partition >partition number>
+
+------------------------------------------------------------------------------------------------------------------------------
+Logical Volume Group (LVM)
+------------------------------------------------------------------------------------------------------------------------------
+
+--> "virtualisation of storage"
+--> extends chapter "Managing Storage"
+
+Show Informations
+----------------------
+
+Physical Volume (PV) ... physical storage, partition
+Volume Group (VG) ... groups every physical volume
+Logical Volume (LG) ... a file system within the volume group
+
+pvs ... information about PV's
+vgs ... information about VG's
+lvs ... information about LV's
+
+same, but more information:
+pvdisplay
+vgdisplay
+lvdisplay
+
+Creation
+----------------------
+
+pvcreate <device> ... initializes PV on a device, to belong to LVM; will overwrite partition!
+Reminder: Devices (lsblk) under /dev
+
+vgcreate <name> <device> ... generate new VG and adds PV; will pvcreate on device automatically, when pvcreate was not made before; VG cannot be empty
+Reminder: Devices (lsblk) under /dev
+Technical: writes meta data on device, so device know to which VG
+
+lvcreate -n <name> -L <size> <VG> ... creates logical volume; minimum
+-L <size> ... defines size, e.g. 500M
+--> man-Page really good, raid and thin provisioning possible
+--> create file system and mount it!
+--> accessible under /<mnt dir>/<VG>/<LV> --> link made by mapper
+
+/dev/mapper ... shows links from mapper
+
+Extending Storage
+----------------------
+
+lvextend -L +<size> <LV> ... extend LV, size e.g. +300M
+--> LV path or LV name (Attention: LV name not unique! (only in VG), VG/LV or mapper-path possible too)
+lvextend -L <size> <LV> ... resize exactly on size
+lvextend -l +<size>%FREE <LV> ... small l!, use <size> available space for it, e.g. +100%FREE --> use 100% of remaining space of VG
+-r ... resize file system automatically --> otherwise LV extended, but file system remains on same size!
+
+resizing file system:
+xfs_growfs <mountpoint of file system> ... for xfs, extend file system on hole device
+resize2fs <device> ... for ext4, extend file system on hole device
+
+vgextend <name> <device> ... extends VG with <device>, when VG exists; will pvcreate on device automatically, when pvcreate was not made before
+
+Shrink Storage
+----------------------
+
+xfs cannot shrink!
+only ext4, but have to be unmounted; fs first, then LV (can delete data permanently!)
+lvextend -L -<size> <LV> ... extend LV, size e.g. -300M; LV name or LV path
+
+Removing a device
+----------------------
+
+pvmove <device> ... move data from <device> to another PV
+--> then remove
+
+Removing / Deleting
+----------------------
+
+unmount LV first! Don't forget /etc/fstab
+
+lvremove <LV> ... remove LV
+--> LV path or LV name (Attention: LV name not unique! (only in VG), VG/LV or mapper-path possible too)
+
+vgremove <VG> ... remove VG
+
+pvremove <device> ... remove LVM-disk-label from device
