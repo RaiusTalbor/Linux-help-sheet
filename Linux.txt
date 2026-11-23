@@ -40,6 +40,7 @@ Network settings (Iptables, Nftables, Interfaces, NetworkManager - nmcli, Networ
 Administration settings
 Managing Storage (Basics, Mounting, file systems, Creating partitions)
 Logical Volume Manager (LVM)
+SELinux
 
 ------------------------------------------------------------------------------------------------------------------------------
 Installation
@@ -1472,3 +1473,19 @@ lvremove <LV> ... remove LV
 vgremove <VG> ... remove VG
 
 pvremove <device> ... remove LVM-disk-label from device
+
+------------------------------------------------------------------------------------------------------------------------------
+SELinux
+------------------------------------------------------------------------------------------------------------------------------
+
+getenforce ... current SELinux mode
+
+sestatus ... information about status of SELinux
+
+/etc/selinux/config ... Configuration file
+
+ls -Z <file> ... see context of a file/dir
+--> type always marked with _t
+ps -eZ <process> ... context of processes
+id -Z <user> ... context of user
+semanage fcontext -l ... list all expected contexts (filter with grep) --> man-page over 'semanage-fcontext'
