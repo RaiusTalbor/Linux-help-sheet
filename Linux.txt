@@ -36,7 +36,8 @@ Synchronize Directories
 Compressing (gzip, bzip2, xz, zip, tar)
 Users (Managing Users, group users)
 Permissions
-Network settings (Iptables, Nftables, Interfaces, NetworkManager - nmcli, Network Name Spaces, Firewall, Ports)
+Network settings (Iptables, Nftables, Interfaces, NetworkManager - nmcli, Network Name Spaces, Ports)
+Firewall (firewalld)
 Administration settings
 Managing Storage (Basics, Mounting, file systems, Creating partitions)
 Logical Volume Manager (LVM)
@@ -137,6 +138,9 @@ man --regex <regular expression> ... searching with regular expression * ? ...
 man 7 <package> ... specific chapter (e.g. 7)
 man -a <package> ... all but in order one by another like a book
 
+/ ... search in man page
+Enter ... jump to next finding
+
 tldr
 ---------------------
 
@@ -146,6 +150,7 @@ tldr <package> ... show discription and most common commands/use cases
 
 gnome-help
 ---------------------
+
 yelp
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -162,10 +167,13 @@ Information: To make the alias persistent, just place it in your $HOME/.bashrc f
 Reboot tut gut
 ------------------------------------------------------------------------------------------------------------------------------
 
-shutdown now
 reboot
-shutdown -now
-shutdown -h 10:00 "This is the printed warning, -h determines the time." 
+poweroff
+
+shutdown <time> <message> ... time and printed warning optional
+shutdown <hh>:<mm> ... shutdown in hh hours and mm minutes
+shutdown +<minutes> ... shutdown in <minutes>
+shutdown now
 
 ------------------------------------------------------------------------------------------------------------------------------
 Connect via SSH
@@ -1246,19 +1254,6 @@ ip address show
 2: veth1@if2: <BROADCAST,MULTICAST> mtu 1500...
 link/ether 96:97:d1:7c:42:f6 brd ff:ff:ff:ff:ff:ff link-netns netTwo
 
-Firewall
-----------------------
-Ports represented with service-names like http for port 80 or ssh for port 22
---> service configurates port
-
-firewall-cmd --add-service http ... opens http-Port
-
-firewall-cmd --add-service httpd --permanent ... opens http-Port and remembers after reboot
-
-firewall-cmd --list-all ... show every rules
-
-firewall-cmd --add-port 8080/tcp ... opens port 8080 for tcp
-
 Ports
 ----------------------
 
@@ -1271,15 +1266,138 @@ ss ... a list of open non-listening sockets (e.g. TCP/UNIX/UDP) that have establ
 --> man-page
 --> sudo shows process names
 
+--> port-forwarding --> Firewall
+
+------------------------------------------------------------------------------------------------------------------------------
+Firewall (Firewalld)
+------------------------------------------------------------------------------------------------------------------------------
+
+Concept
+----------------------
+
+Firewalld works with zones, in which services and access to ports are allowed or not
+--> e.g. public, home, trusted, drop, ...
+--> every interface/IP/... is located within a zone (only one or no zone possible!)
+--> man firewalld for conceps
+
+General
+----------------------
+
+firewall-cmd ... general control over firewalld (man firewall-cmd)
+
+--zone <zonename> ... all option effects only this zone, otherwise the default zone (list-options too)
+--permanent ... will remember after reboot or reload
+
+Show Information
+----------------------
+
+--state ... schow status of firewalld
+--get-default-zone
+--get-zones ... show predefined zones
+--get-active-zones ... shows active zones with interface
+--list-all ... more information to active zones, e.g. which services are allowed to use zone; "rules"
+--list-interfaces ... show interfaces of default zone
+--list-sources ... list all known sources
+
+--show-services ... show every known service by firewalld
+--info-service ... show service information, ports, protocols, source-ports and so on
+--> services bundles ports and protocols under one name --> service is given, all required ports and protocols
+--> also under /usr/lib/firewalld/services/
+--> there some more specifications, e.g. allowed protocols and ports
+
+Managing
+----------------------
+
+Routing information: rules priority in this order Source, Interface, Default Zone/Interface
+--> when IP mathes source, this ruleset (no other)
+--> when IP don't match any source and don't came from an interface --> default zone
+
+--new-zone <zonename> ... create new zone
+--delete-zone <zonename> ... delete zone
+--path-zone <zonename> ... show path to configuration file of zone
+
+--add-service <service> ... add service, e.g. http or ssh, as allowed in zone (--> --info-service)
+--remove-service <service>  ... remove service as allowed
+
+--add-port <port>/<protocol> ... open port for specific protocol in zone, e.g. 8080/tcp
+--remove-port <port>/protocol> ... close port 
+
+--change-interface <interface> ... change zone of specific interface
+--remove-interface <interface> ... removes interface from zone
+--add-interface <interface> ... add interface to zone
+Information: Have to be managed by NetworkManager - otherwise, it behaves different (--> man firewall-cmd)
+
+--add-source <IP/MAC> ... binds a specific MAC/IP to zone, IPset possible (:separated)
+--remove-source <IP/MAC> ... remove specific MAC/IP from zone
+--change-source <IP/MAC> ... change zone of specific IP/MAC, when no zone, than behaves like add-source
+--> routes specific IP/MAC/...-addresses from other computers/... to another zone
+
+--reload ... update settings and refresh
+
+Rich Language
+----------------------
+
+more complex firewall settings, extends the current zone elements
+
+rule is part of a zone
+--> one zone, many rules
+--> if some interact/contradict, first rule matches wins (like normal firewall)
+--> man-page is your friend
+
+firewall-cmd --list-rich-rules ... show all rich rules
+
+firewall-cmd --add-rule 'rule <source> <destination> <option> <log> <audit> <action>' ... general, every parameter is optional except option
+--remove-rule '<rule>'
+
+rule:
+family="ipv4" ... optional, or ipv6, empty --> for both
+priority="<number>" ... number from -32768 to +32768, lowest wins
+--> negative before other rules, then log, deny, allow, 0 (default), then positive
+--> same priority, then log, deny, allow
+
+source:
+source not <address> ... "not" optional, address can be: address="<ip>" , mac="<mac>" , ipset="<ipset>"
+
+destination:
+destination not <address> ... "not" optional, address can be: address="<ip>" , mac="<mac>" , ipset="<ipset>"
+
+option (only one):
+service name="<service>" ... rule for service
+port port="<port> protocol="<tcp/udp/sctp/dccp>" ... rule for specific port
+protocol value="<protocol>" ... rule for specific protocol
+forward-port port="<port>" protocol="<tcp/udp/sctp/dccp>" to-port="<port>" to-addr="<IP>" ... port forwarding, no action allowed in rule
+--> e.g. rule family="ipv6" source address="1:2:3:4:6::" forward-port to-addr="1::2:3:4:7" to-port="4012" protocol="tcp" port="4011"
+
+Log/Audit:
+--> Man-page
+
+Action (only one):
+accept
+reject <type> ... type="<value>" optional, can only block some specific packages like icmp
+drop
+--> every can limit, for logging; limit value="<value>"; e.g. 2/m --> 2 per minute
+
+Port forwarding
+----------------------
+
+--> rich rules for more controll
+--> firewall-cmd possible
+
+firewall-cmd --add-forward-port port=<port>:proto=<protocol>:toport=<port>:toaddr=<IP> ... toport and toaddr optional
+--timeout <time> ... <number>s/m/h --> specific delay, default seconds; then no --permanent
+firewall-cmd --remove-forward-port port=<port>:proto=<protocol>:toport=<port>:toaddr=<IP> ... toport and toaddr optional
+
 ------------------------------------------------------------------------------------------------------------------------------
 Administration settings
 ------------------------------------------------------------------------------------------------------------------------------
 
-Change Hostname:
+Change Hostname
+----------------------
 hostnamectl ... show status (also: hostnamectl status)
 hostnamectl hostname <new hostname> ... new hostname (also with "")
 
-Change time:
+Change time
+----------------------
 date ... show actual date and time
 timedatectl ... show status (also: timedatectl status)
 timedatectl set-time YYYY-MM-DD HH:MM:SS ... set time
@@ -1287,7 +1405,8 @@ list-timezones ... list timezones
 set-timezone <timezone> ... set timezone
 --> more in man timedatectl
 
-Time Convertion:
+Time Convertion
+----------------------
 date -d "Dec 12 2014 15:00:00" +%s ... to epoch time
 date --date @1418414400 ... from epoch time
 
@@ -1558,6 +1677,6 @@ semanage port ... editing tool for ports
 
 semanage port -a -t <service-name> -p <protocol> <port> ... add new port a service can listen to
 --> service-name --> see list
---> protocol often tcp, sometime udp
+--> protocol often tcp, sometime udp --> more informations probably firewalld helpful
 --> port, e.g. 8081
 --> not shorter :)
