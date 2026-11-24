@@ -41,6 +41,7 @@ Firewall (firewalld)
 Administration settings
 Managing Storage (Basics, Mounting, file systems, Creating partitions)
 Logical Volume Manager (LVM)
+Grub-Loader
 SELinux
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -1607,6 +1608,18 @@ lvremove <LV> ... remove LV
 vgremove <VG> ... remove VG
 
 pvremove <device> ... remove LVM-disk-label from device
+
+------------------------------------------------------------------------------------------------------------------------------
+Grub-Loader
+------------------------------------------------------------------------------------------------------------------------------
+
+after initializing the hardware, GRUB2 will be bootet, GRUB2 decides the OS
+--> menu, where you can choose different OS or some secure-boot options
+
+/etc/default/grub ... config-file, more configurations unter /etc/grub.d (dir)
+grub2-editenv list ... show some hidden options, e.g. if the menu before boot is hidden
+grub2-editenv - unset menu_auto_hide ... unhide the menu
+grub2-mkconfig -o /boot/grub2/grub.cfg ... save and create new configuration
 
 ------------------------------------------------------------------------------------------------------------------------------
 SELinux
