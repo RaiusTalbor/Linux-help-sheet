@@ -16,7 +16,7 @@ Connect via SSH
 Directory of Output or Input
 Navigating through Directory
 Managing Directories
-Find Directories
+Find Files and Directories
 Special Linux Directories
 Reading a file
 Comparing files
@@ -29,7 +29,7 @@ Package Manager RPM / DNF
 Creating Debian-Packages
 System Control
 Managing Processes
-Logging (Journalctl)
+Logging (Journalctl, ausearch)
 Templating Images (bootc)
 Automated Jobs (cron, At, sleep, Systemd-Units)
 Synchronize Directories
@@ -244,13 +244,14 @@ dd ... for copy and convert
 du -sh ... estimate file space usage, summerized human readable
 
 ------------------------------------------------------------------------------------------------------------------------------
-Find Directories
+Find Files and Directories
 ------------------------------------------------------------------------------------------------------------------------------
 
 locate ... find files
 --> probably "update updatedb" after change for refreshing the db
 
-find ... recursive #-name (only list files with a certain pattern in their name), 
+find ... recursive search
+-name ... only list files with a certain pattern in their name
 -iname ... ignore the case of file names
 -type ... which will restrict the results to files of a certain specified type
 -d ... for directory
@@ -542,16 +543,16 @@ case
 
 case $ANSWER in
 
-  y | Y | yes | Yes | YES)
+  (y | Y | yes | Yes | YES)
     echo "Continuing..."
     ;;
 
-  n | N | no | No | NO)
+  (n | N | no | No | NO)
     echo "Aborted."
     exit 1
     ;;
 
-  *)
+  (*)
     echo "Invalid input. Please enter y or n."
     exit 1
     ;;
@@ -766,11 +767,13 @@ fg ... run a background process in the foreground
 jobs / jobs -l ...shows background jobs
 
 ------------------------------------------------------------------------------------------------------------------------------
-Logging (Journalctl)
+Logging (Journalctl, ausearch)
 ------------------------------------------------------------------------------------------------------------------------------
 
-journalctl ... show logs
+journalctl
+--------------------
 
+journalctl ... show logs, easier to read
 -r ... reverse order
 -n <number> ... limiting logging entries
 -u <system/process/...> ... logs from specifig service (can be combined with -n)
@@ -784,6 +787,15 @@ journalctl ... show logs
 
 journalctl | grep <word> ... filtering
 journalctl | tail ... last entries
+
+ausearch
+--------------------
+
+ausearch ... show logs, raw file, more detailed
+-ts <time> ... search for events before given time (date - time), words also possible: now, recent, this-hour, this-week, today, yesterday ...
+-te <time> ... same like ts, but with end time
+-m <message-type> ... search for specific message types (also comma separated list possible); many types, shown when left empty, avc for selinux denials, selinux_err, user_selinux_err
+-i ... interpret numeric values to text, e.g. UID to Name
 
 ------------------------------------------------------------------------------------------------------------------------------
 Templating Images
@@ -1249,12 +1261,15 @@ firewall-cmd --add-port 8080/tcp ... opens port 8080 for tcp
 
 Ports
 ----------------------
+
 possible with netstat
 
 ss ... a list of open non-listening sockets (e.g. TCP/UNIX/UDP) that have established connections
-ss -l ... like ss
-ss -o state established '( dport = :ssh or sport = :ssh )' ... Display all established ssh connections. (same way tcp, udp, http, ...)
+-l ... a list of open listening sockets (e.g. TCP/UNIX/UDP) that have established connections
+-o ... state established '( dport = :ssh or sport = :ssh )' ... Display all established ssh connections. (same way tcp, udp, http, ...)
+-p ... processes using sockets
 --> man-page
+--> sudo shows process names
 
 ------------------------------------------------------------------------------------------------------------------------------
 Administration settings
@@ -1480,12 +1495,69 @@ SELinux
 
 getenforce ... current SELinux mode
 
+setenforce <0/1> ... set 1 for enforcing mode, set 0 to permissive mode
+
 sestatus ... information about status of SELinux
 
 /etc/selinux/config ... Configuration file
+
+Contexts
+----------------------
+
+every service is only allowed to access, when context is correct - even if the permissions are correct!
 
 ls -Z <file> ... see context of a file/dir
 --> type always marked with _t
 ps -eZ <process> ... context of processes
 id -Z <user> ... context of user
 semanage fcontext -l ... list all expected contexts (filter with grep) --> man-page over 'semanage-fcontext'
+
+semanage fcontext -at <context-type> <file/dir> ... edit/add context to a specific file/dir
+--> most common case: 403 Http
+  - control over setenforce or jornalctl, if error by SELinux
+  - list contexts with semanage (to see whats wrong, correct http-path e.g. is /var/www/html)
+  - correct contexts
+--> examples man-page
+--> for recursive changes use <dir>(/.*) (then don't forget "<dir>")
+--> new files would inherit the context because of the policy
+--> have to use restorecon for correct relabeling
+
+restorecon <file/dir> ... restore/correct contexts; used, when context edited with semanage and the context has to be changed for the underlaying files and directories
+-r ... recursive
+-v ... verbose, show informations
+
+chcon -t <context-type> <file/dir> ... same like semanage, but without creating a rule in policy (restorecon would remove this change, because there is no policy rule); new files in a dir would not inherit the context
+
+Booleans
+----------------------
+
+Boolean Policy Rules
+
+getsebool -a ... list all booleans (filter with grep)
+getsebool <boolean> ... show value of specific boolean
+semange boolean -l ... list all booleans, current values and descriptions
+
+setsebool <boolean> <value> ... enable/disable boolean; values: 1/on/true ; 0/off/false
+setsebool <enable/disable> <boolean> ... same
+setsebool <boolean1>=<value> <boolean2>=<value> <...> ... multiple rules at once
+-P ... persistent (otherwise, reset after reboot)
+-V ... verbose, more informations
+-N ... no reload in kernel
+
+dnf install selinux-policy-doc
+--> access to special documentation
+--> man <service>_selinux (--> man -k)
+
+Ports
+----------------------
+
+every service is only allowed to access specific ports
+
+semanage port ... editing tool for ports
+-l ... list all service andtheir allowed ports (filter mit grep)
+
+semanage port -a -t <service-name> -p <protocol> <port> ... add new port a service can listen to
+--> service-name --> see list
+--> protocol often tcp, sometime udp
+--> port, e.g. 8081
+--> not shorter :)
