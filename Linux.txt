@@ -41,8 +41,10 @@ Firewall (firewalld)
 Administration settings
 Managing Storage (Basics, Mounting, file systems, Creating partitions)
 Logical Volume Manager (LVM)
-Grub-Loader
+Grub-Loader (Basics and resetting password without permissions)
 SELinux
+Podman
+Curl
 
 ------------------------------------------------------------------------------------------------------------------------------
 Installation
@@ -98,11 +100,14 @@ Double Tab to see all possible options
 
 Hidden files starts with an .
 
+exit ... ending a session (e.g. ssh, su)
+
 ------------------------------------------------------------------------------------------------------------------------------
 More Rights
 ------------------------------------------------------------------------------------------------------------------------------
 
 su - ... substitute user ("everything"), login as root
+su ... same
 
 sudo <command> ... superuser do, execute as root, but its audited (best practise)
 sudo -i ... creats subshell, every following command is executed as root
@@ -180,7 +185,8 @@ shutdown now
 Connect via SSH
 ------------------------------------------------------------------------------------------------------------------------------
 
-ssh user@example.com
+ssh <user>@<connection> ... IP or dns-name
+exit ... ending a session
 
 ------------------------------------------------------------------------------------------------------------------------------
 Directory of Output or Input
@@ -226,7 +232,7 @@ ls ... shows directory below current dir, can filter e.g. ls *file*
 -h ... human readable
 
 tree ... shows directory-tree
-tree -d ... only directories
+-d ... only directories
 
 df -h ... filesystems (in Human readable)
 
@@ -665,8 +671,8 @@ rpm -U <package>.rpm ... updates special package without dependencies
 dnf update --security ... only security fixes
 dnf update --sec-severity=Important --sec-severity=Critical ... highest priority
 
-rpm -qil foo ... information about package
-rpm -q --scripts httpd ... shows installation script
+rpm -qil <package> ... information about package
+rpm -q --scripts <package> ... shows installation script
 rpm -q --changelog <package> ... shows changelog
 
 dnf remove <package> ... with dependencies
@@ -728,13 +734,13 @@ dpkg -b ./helloworld helloworld.deb
 System Control
 ------------------------------------------------------------------------------------------------------------------------------
 
-systemctl start|stop|restart httpd.service ... Starting, stopping, restarting a service
+systemctl start|stop|restart <service> ... Starting, stopping, restarting a service
 
-systemctl enable|disable httpd.service ... Enabling or disabling a system service from starting up at system boot
+systemctl enable|disable <service> ... Enabling or disabling a system service from starting up at system boot
 
-systemctl enable --now httpd.service ... start and enable at once
+systemctl enable --now <service> ... start and enable at once
 
-systemctl status httpd.service ... checking on the status of a service:
+systemctl status <service> ... checking on the status of a service:
 
 ------------------------------------------------------------------------------------------------------------------------------
 Managing Processes
@@ -1613,13 +1619,40 @@ pvremove <device> ... remove LVM-disk-label from device
 Grub-Loader
 ------------------------------------------------------------------------------------------------------------------------------
 
-after initializing the hardware, GRUB2 will be bootet, GRUB2 decides the OS
+after initializing the hardware, GRUB2 will boot, GRUB2 starts the OS
 --> menu, where you can choose different OS or some secure-boot options
 
 /etc/default/grub ... config-file, more configurations unter /etc/grub.d (dir)
 grub2-editenv list ... show some hidden options, e.g. if the menu before boot is hidden
 grub2-editenv - unset menu_auto_hide ... unhide the menu
 grub2-mkconfig -o /boot/grub2/grub.cfg ... save and create new configuration
+
+Reset Root-Password without permissions
+----------------------
+
+requirments: GRUB not hidden, no encrypted disk, no GRUB-password, physical access
+sometimes: Secure Boot-Safety disable, unlocked firmware
+--> high risk
+
+works for Red Hat Enterprise Linux (tested)/Fedora/Rocky/Alma
+
+1. when GRUB2 show menu --> 'e' at first entry
+2. line with "linux" --> "ro" to "rw"; remove "rhgb quit"; append "init=/bin/bash"
+3. Strg+x; shell is starting
+4. passwd ... change password
+5. touch /.autorelabel ... initializes relabling from SELinux for new passwd-file
+6. sync ... synchronizes changes, otherwise, the new password won't be set
+7. exec /sbin/init ... starts the OS
+
+for Debian/Ubuntu/Mint (not tested!)
+--> probably Recovery Mode (resetting administration password)
+
+1. when GRUB2 show menu --> 'e' at first entry
+2. line with "linux" --> "ro" to "rw"; remove "rhgb quit"; append "init=/bin/bash"
+3. Strg+x; shell is starting
+4. passwd ... change password
+5. sync ... synchronizes changes, otherwise, the new password won't be set
+6. exec /sbin/init ... starts the OS
 
 ------------------------------------------------------------------------------------------------------------------------------
 SELinux
@@ -1693,3 +1726,88 @@ semanage port -a -t <service-name> -p <protocol> <port> ... add new port a servi
 --> protocol often tcp, sometime udp --> more informations probably firewalld helpful
 --> port, e.g. 8081
 --> not shorter :)
+
+------------------------------------------------------------------------------------------------------------------------------
+Podman
+------------------------------------------------------------------------------------------------------------------------------
+
+Concept
+----------------------
+
+containerisation, but deamonless unlike docker
+--> rootless (more secure)
+--> more integrated to systemd and SELinux
+--> integrated in Red Hat environment (e.g. RHEL, OpenShif)
+--> Kubernetes integration
+--> compatible to each other (commands the same) (because of Open Containerisation Initiative (OCI))
+
+pods --> allowing multiple containers to be managed as a group
+
+General commands and documentation
+----------------------
+
+podman ... general command
+--version ... version
+--help
+man podman --> on the end all man-pages listed
+man containers.conf ... see configuration file documentation (and where it is located)
+
+Images
+----------------------
+
+search <keyword> ... search for an image
+image inspect <imagename> ... show informations about image
+
+images ... list all local images
+pull <imagename> ... download image
+
+information: ubi10 image from RH provides an "Universal Base Image" for containers (current version 10); good starting point
+
+Show information
+----------------------
+
+<container> ... can be a list, e.g. con1 con2 ... name or id
+
+ps ... show running containers --> same like "container ps"/"container list"/"container ls"
+-a ... show all containers
+-f <filter-option> ... filter list, e.g. name=<name>, status=<status>, ...
+
+logs <container> ... show logs of container
+
+Managing containers
+----------------------
+
+run <image> ... create container
+--name <name> ... give container a name, don't forget "", when name not one word
+-it ... make stdin available for container ("interactive") and allocate a pseudo-tty
+--rm ... removes container and anonymous unnamed volume when container exits
+-d ... run container in background
+--> e.g. podman run -dit --name DIT1 ubi10 bash
+
+attach <container> ... bring container back in foreground (when started with -d)
+
+-v <host-dir>:<container-dir> ... mount a host-dir (with files in it) into container at container-dir
+--> when no host-dir given, podman creates a random one
+-v <host-dir>:<container-dir>:<options> ... rw/ro; relabel host-DIR requiered for SELinux: z ... shared (other container can use too); Z ... private (only this container)
+
+run <image> <cmd> ... to execute a cmd (in ubi10)
+-p <port1>:<port2> ... publish port, forwarding port to container; port1 --> port, which should be reachable (e.g. 8082, 87465); port2 --> port, which is actual reachable from container (e.g. 80, 8080)
+-P ... publish all ports
+
+start <container> ... start container
+restart <container> ... restart container
+stop <container> ... stop container
+
+rm <container> ... remove container (from list too)
+-a ... remove all containers, which are not running
+-f ... force; remove no matter the state
+
+exec <container> <cmd> ... run a command in a running container
+
+------------------------------------------------------------------------------------------------------------------------------
+Curl
+------------------------------------------------------------------------------------------------------------------------------
+
+curl <url> ... show information about a http file of <url> (in general), url can be a website, localhost, ip, ...
+-v ... verbose, show more information
+-I ... show header only, sometimes some general information
