@@ -245,6 +245,7 @@ Managing Directories
 touch ... is used to set the access, change, and edit times of files, as well as to create empty files.
 
 mkdir <path>
+-p ... create all missing subdirectories, when missing
 rmdir <path> ... delete
 rm -rf <path> ... remove it with everything in it
 rm -i ... remove with confirmation
@@ -1092,6 +1093,8 @@ id ... shows actual user-id
 usermod ... modify users
 usermod -s <Shell-Dir> <User> ... changes the shell of a user
 
+loginctl show-user <user> ... show some login information
+
 Group Users
 ----------------------
 
@@ -1735,7 +1738,7 @@ Concept
 ----------------------
 
 containerisation, but deamonless unlike docker
---> rootless (more secure)
+--> rootless (more secure) (you can use it without sudo --> use your dir and not root)
 --> more integrated to systemd and SELinux
 --> integrated in Red Hat environment (e.g. RHEL, OpenShif)
 --> Kubernetes integration
@@ -1752,6 +1755,8 @@ podman ... general command
 man podman --> on the end all man-pages listed
 man containers.conf ... see configuration file documentation (and where it is located)
 
+info ... show information
+
 Images
 ----------------------
 
@@ -1759,9 +1764,31 @@ search <keyword> ... search for an image
 image inspect <imagename> ... show informations about image
 
 images ... list all local images
-pull <imagename> ... download image
+pull <imagename> ... download image to local image storage; "run" pull automatically missing images (first match wins)
+rmi <image> ... remove image from local image storage
 
 information: ubi10 image from RH provides an "Universal Base Image" for containers (current version 10); good starting point
+
+Login and more images
+----------------------
+
+--> Sometimes, the images in registry dosn'T fit in the specifications
+--> login to quay.io, registry.redhat.io (not registry.access.redhat.io), ... to download specific images
+
+login <url> ... login to registry
+--> man podman-login
+--> saves login credentials
+--> then pull from sites, where you can't pull without credentials
+
+logout ... deletes current login credentials
+
+save <image> ... save image to a local file or dir (location is unimportant) --> default output to stdout (use > )
+--format <format> ... docker-archive, oci-archive, docker-dir, oci-dir
+-o <file> ... write to a file
+--> don't have to, only for systems without internet connection, backup systems without registry, ...
+
+load <file> ... load an image from image file to local image storage --> now usable as normal image
+--> nescessary for systems without registry
 
 Show information
 ----------------------
@@ -1772,9 +1799,11 @@ ps ... show running containers --> same like "container ps"/"container list"/"co
 -a ... show all containers
 -f <filter-option> ... filter list, e.g. name=<name>, status=<status>, ...
 
+inspect <container> ... show configuration (filter with grep)
+
 logs <container> ... show logs of container
 
-Managing containers
+Create containers
 ----------------------
 
 run <image> ... create container
@@ -1790,9 +1819,10 @@ attach <container> ... bring container back in foreground (when started with -d)
 --> when no host-dir given, podman creates a random one
 -v <host-dir>:<container-dir>:<options> ... rw/ro; relabel host-DIR requiered for SELinux: z ... shared (other container can use too); Z ... private (only this container)
 
+Managing containers
+----------------------
+
 run <image> <cmd> ... to execute a cmd (in ubi10)
--p <port1>:<port2> ... publish port, forwarding port to container; port1 --> port, which should be reachable (e.g. 8082, 87465); port2 --> port, which is actual reachable from container (e.g. 80, 8080)
--P ... publish all ports
 
 start <container> ... start container
 restart <container> ... restart container
@@ -1803,6 +1833,68 @@ rm <container> ... remove container (from list too)
 -f ... force; remove no matter the state
 
 exec <container> <cmd> ... run a command in a running container
+
+Ports
+----------------------
+
+run -p <port1>:<port2> ... publish port, forwarding port to container; port1 --> port, which should be reachable (e.g. 8082, 87465); port2 --> port, which is actual reachable from container (e.g. 80, 8080)
+-P ... publish all ports
+
+Information: Podmam (and other unprevileged services) are not allowed to use port 1024 and below
+
+Environment Variables
+----------------------
+
+run -e <var> <value> <image> ... give an environment variable to container (most images configurable with it)
+run --env-file <file> <image> ... give a file contains many environment variables (one each line) to container
+
+exec <container> printenv <var> ... print var
+exec <container> env ... print every environment variable
+
+Remember: inspect <container> | grep -A<number> Env ... show environment variables
+Information: EVERY var in plaintext
+
+secret create <var> <value> ... give container a secret; value can be a file, where many vars are stored (each line one)
+--env=true ... use secret as environment variable
+
+Quadlets / Automation with Systemd
+----------------------
+
+--> man podman-systemd.unit
+--> man podman-container.unit
+not as complicated as it seems to be
+
+create a file (recommended: <name>.container) and save under ~/.config/containers/systemd/
+
+file:
+>>
+[Unit]
+Description=Write something useful
+
+[Container]
+Image=<image>
+ContainerName=<name>
+PublishPort=<published port>:<container-port>
+Volume=<Host-Dir>:<container-dir>:<options>
+Environment=<var>=<value>
+EnvironmentFile=<file>
+Exec=<cmd> 
+
+[Install]
+WantedBy=default.target
+<<
+
+--> like podman run, every option has a line (see man podman-systemd.unit --> table)
+
+--> management by systemd
+--> systemctl enable doesn't work --> systemctl --user daemon-reload (after every change, the deamon look up and refreshs, starting the container)
+
+systemctl --user <start/stop/...> <container>.service ... managing over systemd
+--> --user nescessary
+
+Problem: Podman start only when user is logged in
+loginctl enable-linger <user> ... process manager starts with boot and ends when system shutdown --> container will be startet with boot
+loginctl disable-linger <user>
 
 ------------------------------------------------------------------------------------------------------------------------------
 Curl
