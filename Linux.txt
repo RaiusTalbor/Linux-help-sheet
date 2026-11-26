@@ -43,7 +43,7 @@ Managing Storage (Basics, Mounting, file systems, Creating partitions)
 Logical Volume Manager (LVM)
 Grub-Loader (Basics and resetting password without permissions)
 SELinux
-Podman
+Containerisation (Podman / Docker)
 Curl
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -1731,7 +1731,7 @@ semanage port -a -t <service-name> -p <protocol> <port> ... add new port a servi
 --> not shorter :)
 
 ------------------------------------------------------------------------------------------------------------------------------
-Podman
+Containerisation (Podman / Docker)
 ------------------------------------------------------------------------------------------------------------------------------
 
 Concept
@@ -1745,6 +1745,14 @@ containerisation, but deamonless unlike docker
 --> compatible to each other (commands the same) (because of Open Containerisation Initiative (OCI))
 
 pods --> allowing multiple containers to be managed as a group
+
+Docker
+----------------------
+
+this guide handles Podman in detail, Docker has the same syntax (instead of podman use docker)
+--> https://quickref.me/docker
+
+Information: On Red Hat machines, Podman is pre-installed and cannot used parallel with docker
 
 General commands and documentation
 ----------------------
@@ -1772,7 +1780,7 @@ information: ubi10 image from RH provides an "Universal Base Image" for containe
 Login and more images
 ----------------------
 
---> Sometimes, the images in registry dosn'T fit in the specifications
+--> Sometimes, the images in registry dosn't fit in the specifications
 --> login to quay.io, registry.redhat.io (not registry.access.redhat.io), ... to download specific images
 
 login <url> ... login to registry
@@ -1789,6 +1797,22 @@ save <image> ... save image to a local file or dir (location is unimportant) -->
 
 load <file> ... load an image from image file to local image storage --> now usable as normal image
 --> nescessary for systems without registry
+
+Own Images
+----------------------
+
+build ... create an image from a file
+-t <name> ... tag the image (default: latest)
+-f <dir> ... specifies container image (otherwise it will search in the current directory for container.yaml); url possible too
+--format docker ... create image from Dockerfile (otherwise, Containerfile)
+
+Containerfile / Dockerfile (without suffix)
+FROM <imagename>:<tag> ... Installing a image --> pull image; base for all
+RUN <cmd> ... run somethin on that machine, e.g. dependencies like apt install -y coffee-maker
+COPY <destination> <source> ... Copy files from local system in image; e.g. source code (after that usually run the code)
+CMD [<cmd>] ... Default command after start Container
+
+--> after change, don't forget rebuild!
 
 Show information
 ----------------------
@@ -1833,6 +1857,10 @@ rm <container> ... remove container (from list too)
 -f ... force; remove no matter the state
 
 exec <container> <cmd> ... run a command in a running container
+
+rename <container> <new name> ... rename an existing container
+
+update <options> <container> ... add some configuration, comparible with run
 
 Ports
 ----------------------
@@ -1895,6 +1923,17 @@ systemctl --user <start/stop/...> <container>.service ... managing over systemd
 Problem: Podman start only when user is logged in
 loginctl enable-linger <user> ... process manager starts with boot and ends when system shutdown --> container will be startet with boot
 loginctl disable-linger <user>
+
+More Automation
+----------------------
+
+--> describes and starts hole environment
+--> Podman: not per default available --> recommended to use Pods
+--> Docker more common
+
+compose up ... 
+-f <compose file> ... compose.yaml
+-d ... detach, like run
 
 ------------------------------------------------------------------------------------------------------------------------------
 Curl
