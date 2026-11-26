@@ -9,7 +9,7 @@ Table of content:
 Installation
 Basics (What to do with commands, good to know)
 More Rights
-Find help - Manual Pages (tldr, man, gnome-help)
+Find help - Manual Pages (man, info, docs, tldr, gnome-help)
 Alias - Redefining and Renaming Commands
 Reboot tut gut
 Connect via SSH
@@ -146,6 +146,21 @@ man -a <package> ... all but in order one by another like a book
 
 / ... search in man page
 Enter ... jump to next finding
+
+info
+---------------------
+
+find information through manuals
+
+info <package>
+-a ... use all mathing manuals
+
+Information: more options with emacs
+
+docs
+---------------------
+
+find huge documentation: /usr/share/doc
 
 tldr
 ---------------------
@@ -1891,6 +1906,7 @@ Quadlets / Automation with Systemd
 --> man podman-systemd.unit
 --> man podman-container.unit
 not as complicated as it seems to be
+--> not the same in docker!
 
 create a file (recommended: <name>.container) and save under ~/.config/containers/systemd/
 
