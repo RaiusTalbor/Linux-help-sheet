@@ -203,6 +203,41 @@ Connect via SSH
 ssh <user>@<connection> ... IP or dns-name
 exit ... ending a session
 
+Configure SSH-keys:
+-------------------
+
+Worker:
+ssh-keygen -t ed25519 -C <comment> ... generate keys
+--> type ed25519 (more secure)
+Press enter if it ask you where to save - if you have more, other under .ssh/ansible e.g.
+Passphrase: type whatever I want (Ansible: no passphrase)
+
+ls -al .ssh
+.pub --> public key (Comment behind, type in beginning)
+
+ssh-copy-id -i <path where the .pub is> <target-ip>
+--> i ... inputfile
+
+Now in server: 
+ls -la .ssh/<...>authorized_keys
+
+--> ssh <IP> --> Asking for passphrase now :D
+
+For ansible: add a new key
+--> Watch out, what's prompted: sometimes original and not ansible-passphrase
+	
+ssh -i [path of pub-key of ansible] [target ip] --> direct connection to server
+
+if you don't want to type in the passphrase every time:
+ssh-agent is running in the background --> you can save passphrase there
+
+eval $(ssh-agent) && ssh-add
+--> ask for passphrase
+
+=> no more typing the passphrase ... but not really permanent
+
+with alias or script shorter
+
 ------------------------------------------------------------------------------------------------------------------------------
 Directory of Output or Input
 ------------------------------------------------------------------------------------------------------------------------------
