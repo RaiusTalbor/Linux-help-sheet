@@ -12,7 +12,7 @@ More Rights
 Find help - Manual Pages (man, info, docs, tldr, gnome-help)
 Alias - Redefining and Renaming Commands
 Reboot tut gut
-Connect via SSH
+Remote Control (SSH, transfering files)
 Directory of Output or Input
 Navigating through Directory
 Managing Directories
@@ -29,6 +29,7 @@ Package Manager RPM / DNF
 Creating Debian-Packages
 System Control
 Managing Processes
+TuneD
 Logging (Journalctl, ausearch)
 Templating Images (bootc)
 Automated Jobs (cron, At, sleep, Systemd-Units)
@@ -198,46 +199,87 @@ shutdown +<minutes> ... shutdown in <minutes>
 shutdown now
 
 ------------------------------------------------------------------------------------------------------------------------------
-Connect via SSH
+Remote Control (SSH, transfering files)
 ------------------------------------------------------------------------------------------------------------------------------
 
-ssh <user>@<connection> ... IP or dns-name
-exit ... ending a session
-
-Configure SSH-keys:
+Connection - The Basics
 -------------------
 
-Worker:
+ssh <user>@<connection> ... IP or dns-name; ssh <ip> possible too
+exit ... ending a session
+
+The Advanced Section
+-------------------
+
+sshd -t ... test mode
+ssh -i <path of pub-key of <user/ansible/...>> <target ip> ... direct connection to remote
+
+/etc/ssh/ssh_config ... configuration path --> e.g. deactivate password authentificatio
+
+Configure SSH-keys
+-------------------
+
+local site:
 ssh-keygen -t ed25519 -C <comment> ... generate keys
 --> type ed25519 (more secure)
-Press enter if it ask you where to save - if you have more, other under .ssh/ansible e.g.
-Passphrase: type whatever I want (Ansible: no passphrase)
+--> Press enter if it ask you where to save - if you have more, other as .ssh/ansible e.g. (dir ~/.ssh have to exist); for Windows: same xD
+--> Passphrase: type whatever I want (Ansible: no passphrase)
 
-ls -al .ssh
-.pub --> public key (Comment behind, type in beginning)
+--> Keys now stored under .ssh: .pub --> public key (Comment behind, type in the beginning)
 
-ssh-copy-id -i <path where the .pub is> <target-ip>
+ssh-copy-id -i <.pub file> <target-ip> ... Copy keys to remote site; for Windows: use scp or sftp (next subsection) instead of ssh-copy-id
 --> i ... inputfile
 
-Now in server: 
-ls -la .ssh/<...>authorized_keys
+now on remote site: --> ssh <IP> --> Asking for passphrase now :D
+ls -la .ssh/<...>authorized_keys ... keys stored here (for Linux)
 
---> ssh <IP> --> Asking for passphrase now :D
+Tips
+-------------------
 
-For ansible: add a new key
---> Watch out, what's prompted: sometimes original and not ansible-passphrase
-	
-ssh -i [path of pub-key of ansible] [target ip] --> direct connection to server
+Information: for <e.g. ansible>: add a new key (not the key from user)
+--> Watch out, what's prompted: sometimes original and not <e.g. ansible>-passphrase
+--> for <e.g. ansible> direct connection
 
-if you don't want to type in the passphrase every time:
-ssh-agent is running in the background --> you can save passphrase there
+eval $(ssh-agent) && ssh-add ... ask for passphrase and save it in ssh-agent
+--> if you don't want to type in the passphrase every time: ssh-agent is running in the background
+--> no more typing the passphrase ... but not really permanent
 
-eval $(ssh-agent) && ssh-add
---> ask for passphrase
+SCP
+-------------------
 
-=> no more typing the passphrase ... but not really permanent
+transfering files via ssh
 
-with alias or script shorter
+scp <source file> <destination file> ... ssh copy
+--> for remote sites: <user>@<IP/DNS-Name>:<path> e.g. ben@172.18.211.140:/home/ben/.ssh
+--> source or destination can be remote
+
+SFTP
+-------------------
+
+transfering files via ssh
+
+sftp <user>@<connection> ... establish SSH-connection; IP or dns-name; sftp <ip> possible too
+-i ... identity file (like ssh)
+-P ... specific port
+--> now Interactiv commands
+
+exit ... ending a session
+
+cd, chmod, chgrp, chown, cp, df, ls, mkdir, rm, pwd ... like normal Linux (see further sections), but for remote site
+
+get <remote path> <local path> ... Download, take remote path and copy to local path; when local not specified, same like remote
+-p ... copy permissions and access times too
+-R ... copy recursivly
+
+put <local path> <remote path> ... Upload, same like get, but other direction: from local to remote
+-p ... copy permissions and access times too
+-R ... copy recursivly
+
+lmdir <path> ... like mkdir; for local site (see further sections)
+
+lcd ... like cd; for local site (see further sections)
+
+lpwd ... like pwd; for local site (see further sections)
 
 ------------------------------------------------------------------------------------------------------------------------------
 Directory of Output or Input
@@ -690,6 +732,17 @@ Package Manager RPM / DNF
 
 for Red Hat Enterprise Linux, Fedora, CentOS, AlmaLinux, openSUSE, ...
 
+Useful
+--------------------
+
+dnf history ... show changes/last commands
+dnf -y history rollback <ID-number> ... change back to state, after ID <number>
+
+dnf needs-restating -r
+
+Install packages
+--------------------
+
 dnf install <package> ... with dependencies
 dnf -y install <package>
 rpm -i foo.rpm ... without dependencies
@@ -697,11 +750,31 @@ dnf list ... list all installed packages
 rpm -qa ... same
 dnf reinstall <package>
 
+Remove packages
+--------------------
+
+dnf remove <package> ... with dependencies
+dnf -y remove <package>
+rpm -e <package.rpm> ... without dependencies
+
+Search and find packages
+--------------------
+
 dnf list "<package>" ... installed version
 dnf search <package>
 dnf provides <command> ... which packages includes this command?
 rpm -qf <file> ... What package is file part of?
 rpm -ql <packages> ... list files which from this package
+
+Information about packages
+--------------------
+
+rpm -qil <package> ... information about package
+rpm -q --scripts <package> ... shows installation script
+rpm -q --changelog <package> ... shows changelog
+
+Verification
+--------------------
 
 rpm -V <package> ... (verify) check package against expected files; attributes:
 S - file Size differs
@@ -714,6 +787,8 @@ G - Group ownership differs
 T - mTime differs
 P - caPabilities differ
 
+Updates
+--------------------
 
 dnf list updates ... show updates
 dnf updateinfo list ... show update information and errata
@@ -723,21 +798,15 @@ rpm -U <package>.rpm ... updates special package without dependencies
 dnf update --security ... only security fixes
 dnf update --sec-severity=Important --sec-severity=Critical ... highest priority
 
-rpm -qil <package> ... information about package
-rpm -q --scripts <package> ... shows installation script
-rpm -q --changelog <package> ... shows changelog
+Repositories
+--------------------
 
-dnf remove <package> ... with dependencies
-dnf -y remove <package>
-rpm -e <package.rpm> ... without dependencies
-
-dnf history ... show changes/last commands
-dnf -y history rollback <ID-number> ... change back to state, after ID <number>
-
-dnf needs-restating -r
+dnf repolist ... show attached Repositories
+-v ... show more information
 
 Red Hat Errata
 --------------------
+
 Red Hat Bug Advisory (RHBA)
 Red Hat Enhancement Advisory (RHEA)
 Red Hat Security Advisory (RHSA)
@@ -832,6 +901,44 @@ bg ... run a suspended process in the background
 fg ... run a background process in the foreground
 
 jobs / jobs -l ...shows background jobs
+
+------------------------------------------------------------------------------------------------------------------------------
+TuneD
+------------------------------------------------------------------------------------------------------------------------------
+
+--> https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/monitoring_and_managing_system_status_and_performance/getting-started-with-tuned_monitoring-and-managing-system-status-and-performance
+
+configures system setting dynamically dependig on usage
+--> different profiles defines different priorities
+
+tuned ... activate
+-d ... start as daemon (background)
+-l <file> ... log, when no log file specified: /var/log/tuned/tuned.log
+
+Profiles
+--------------------
+
+tuned-adm ... general command
+
+list ... list available profiles
+active ... show active profile
+recommend ... recommend a profile for you
+
+auto_profile ... enable automatic profile selection mode, switch to the recommended profile
+profile_mode ... show current profile selection mode
+
+profile_info <profile> ... show profile information; without name: of current profile
+verify ... check, if current system settings match with current profile
+
+profile <profile> ... switch to given profile; can give more than one profile: it tries to merge (last hightest priority); when no profile given: like tuned-adm list
+
+off ... unload tunings/profiles
+
+Own Profiles
+--------------------
+
+can create own profiles (or copy and change existing ones) --> man tuned-adm 
+predefined: /usr/lib/tuned/profiles/ ; from user: /etc/tuned/profiles/
 
 ------------------------------------------------------------------------------------------------------------------------------
 Logging (Journalctl, ausearch)
@@ -1993,7 +2100,7 @@ More Automation
 --> Podman: not per default available --> recommended to use Pods
 --> Docker more common
 
-compose up ... 
+compose up ... search for compose.yaml and create environment
 -f <compose file> ... compose.yaml
 -d ... detach, like run
 
