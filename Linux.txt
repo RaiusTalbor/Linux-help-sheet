@@ -26,6 +26,7 @@ Editors (Nano, VIM, Emacs)
 Creating executable files (variables, functions, parameters, if, case, loops, interaction)
 Package Manager APT / DPKG
 Package Manager RPM / DNF
+Package Manager Flatpak
 Creating Debian-Packages
 Managing Processes
 TuneD
@@ -46,6 +47,7 @@ SELinux
 Containerisation (Podman / Docker)
 Curl
 Git
+Red specific (Registration, Command Line Assistant) 
 
 ------------------------------------------------------------------------------------------------------------------------------
 Installation
@@ -227,7 +229,7 @@ ssh-keygen -t ed25519 -C <comment> ... generate keys
 
 --> Keys now stored under .ssh: .pub --> public key (Comment behind, type in the beginning)
 
-ssh-copy-id -i <.pub file> <target-ip> ... Copy public key to remote site (and target user); for Windows: use scp or sftp (next subsection) instead of ssh-copy-id
+ssh-copy-id -i <.pub file> <target-ip> ... Copy public key to remote site (and target user); for Windows: use scp or sftp (next subsection) instead of ssh-copy-id; but it can be more complicated (typical Windows...)
 --> i ... inputfile
 
 now on remote site: --> ssh <IP> --> Asking for passphrase now :D
@@ -743,12 +745,12 @@ dnf needs-restating -r
 Install packages
 --------------------
 
-dnf install <package> ... with dependencies
+dnf install <package> ... with dependencies, also alredy donloaded
 dnf -y install <package>
-rpm -i foo.rpm ... without dependencies
-dnf list ... list all installed packages
-rpm -qa ... same
+
 dnf reinstall <package>
+
+rpm -i <package>.rpm ... without dependencies
 
 Remove packages
 --------------------
@@ -760,8 +762,12 @@ rpm -e <package.rpm> ... without dependencies
 Search and find packages
 --------------------
 
+dnf list ... list all installed packages
+rpm -qa ... same
 dnf list "<package>" ... installed version
+
 dnf search <package>
+
 dnf provides <command> ... which packages includes this command?
 rpm -qf <file> ... What package is file part of?
 rpm -ql <packages> ... list files which from this package
@@ -801,8 +807,53 @@ dnf update --sec-severity=Important --sec-severity=Critical ... highest priority
 Repositories
 --------------------
 
-dnf repolist ... show attached Repositories
+dnf repolist ... show enabled repositories
 -v ... show more information
+--all ... show all repositories
+--enabled <repo> ... enable repository (there are 100000 other ways to enable repos, don't be confused)
+--disable <repo> ... disable repository
+
+Information: highest version wins when more than one package with same name or lowest priority (see next subsection)
+
+Other repositories
+--------------------
+
+dnf config-manager ... general command
+--add-repo <file or url> ... add and enable repository
+
+manually:
+
+1. Mount repo, e.g. repo from ISO --> Mount DVD-drive
+
+2. file in /etc/yum.repos.d/*.repo
+
+3. per Repository following section
+>>
+[<Repo-ID, no spaces>]
+name=<name (would be shown)>
+baseurl=file://<mountpoint and path to repo>
+priority=99
+enabled=1
+gpgcheck=0
+gpkey=<path, where key is located>
+<<
+
+Priority ... optional, lowest wins, default 99; for packages, when more than one package with same name, repo with lowest prio wins
+<Repo-ID> ... has to be unique, for identification
+baseurl ... URL possible too, e.g. https://example.com/...
+gpkey ... for experiments okay, when optional; only when gpcheck=1, (e.g. in ISO, key is located there)
+
+4. enable repo
+
+Information: take care about the "/" in baseurl, e.g. =file:///mnt/iso/repo
+
+Special
+--------------------
+
+dnf download <package, url or file> ... download a package into current dir
+--downloaddir ... download a package into given dir
+--resolve ... check already installed dependencies and download not installed too
+--alldeps ... download all dependencies, regardless of already existing packages
 
 Red Hat Errata
 --------------------
@@ -810,6 +861,43 @@ Red Hat Errata
 Red Hat Bug Advisory (RHBA)
 Red Hat Enhancement Advisory (RHEA)
 Red Hat Security Advisory (RHSA)
+
+------------------------------------------------------------------------------------------------------------------------------
+Package Manager Flatpak
+------------------------------------------------------------------------------------------------------------------------------
+
+isolated packages, independent from host
+
+flatpak ... general command
+
+Basics
+--------------------
+
+list ... list all packages
+repair ... repair broken packages
+history ... show history of Flatpak actions
+search <text> ... search for packages
+
+Installation
+--------------------
+
+install <remote> <package, location, url> ... install a package, remote ... reppository, e.g. "flathub", optional
+-u / --user ... install it as a per-user installation
+--system ... install systemwide
+update ... update
+uninstall <package> ... uninstall
+
+run <package> ... runs a Flatpak package in a sandbox environment
+
+Repositories
+--------------------
+
+repo <location, url, file> ... show information about repo
+remotes ... list known remote repositories
+-u / --user ... per-user installation
+--system ... systemwide
+remote-add <name> <location, url, file> ... add remote repository
+remote-delete <name> ...delete a remote repository
 
 ------------------------------------------------------------------------------------------------------------------------------
 Create Debian-Packages
@@ -1695,7 +1783,7 @@ Information: for LV path is stable because of mapper (--> LVM)
 
 options:
 often "defaults"
-sometimes ro (read.only), noexec (no execute), _detdev (network device)
+sometimes ro (read.only), noexec (no execute), _detdev (network device), nofail (when disappeared, no error; only recommended for DVD, USB, ...)
 
 fsck: check fs if there are any errors (in this order)
 for xfs / often default: 0
@@ -2175,3 +2263,26 @@ Merging
 --> move back to branch, in which the changes should be applied (git checkout main)
 
 git merge <branch_name, from which the changes came from>
+
+------------------------------------------------------------------------------------------------------------------------------
+Red Hat specific
+------------------------------------------------------------------------------------------------------------------------------
+
+Registration
+----------------------
+
+subscription-manager status ... sho current status of registration
+
+subscription-manager identity ... show information about subscription
+
+subscription-manager register ... register for Red Hat-Subscription
+
+subscription-manager repos --list-enabled ... show Red Hat repos, which are enabled
+--> also known as Content Delivery Manager (CDN)
+
+Command Line Assistant
+----------------------
+
+AI system inside Red Hat Enterprise Linux
+
+c chat "Prompt" ... same like c "Prompt"
