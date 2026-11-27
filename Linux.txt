@@ -27,11 +27,11 @@ Creating executable files (variables, functions, parameters, if, case, loops, in
 Package Manager APT / DPKG
 Package Manager RPM / DNF
 Creating Debian-Packages
-System Control
 Managing Processes
 TuneD
-Logging (Journalctl, ausearch)
+Booting the system and GRUB
 Templating Images (bootc)
+Logging (Journalctl, ausearch)
 Automated Jobs (cron, At, sleep, Systemd-Units)
 Synchronize Directories
 Compressing (gzip, bzip2, xz, zip, tar)
@@ -42,7 +42,6 @@ Firewall (firewalld)
 Administration settings
 Managing Storage (Basics, Mounting, file systems, Creating partitions)
 Logical Volume Manager (LVM)
-Grub-Loader (Basics and resetting password without permissions)
 SELinux
 Containerisation (Podman / Docker)
 Curl
@@ -208,26 +207,27 @@ Connection - The Basics
 ssh <user>@<connection> ... IP or dns-name; ssh <ip> possible too
 exit ... ending a session
 
+ssh -i <pub-key of user/ansible/...> <target ip> ... connection to remote with keys (next subsection)
+
 The Advanced Section
 -------------------
 
 sshd -t ... test mode
-ssh -i <path of pub-key of <user/ansible/...>> <target ip> ... direct connection to remote
 
 /etc/ssh/ssh_config ... configuration path --> e.g. deactivate password authentificatio
 
 Configure SSH-keys
 -------------------
 
-local site:
+Client / local site:
 ssh-keygen -t ed25519 -C <comment> ... generate keys
 --> type ed25519 (more secure)
---> Press enter if it ask you where to save - if you have more, other as .ssh/ansible e.g. (dir ~/.ssh have to exist); for Windows: same xD
+--> Press enter if it ask you where to save - if you have more, other as .ssh/<name of key> (dir ~/.ssh have to exist); for Windows: same xD
 --> Passphrase: type whatever I want (Ansible: no passphrase)
 
 --> Keys now stored under .ssh: .pub --> public key (Comment behind, type in the beginning)
 
-ssh-copy-id -i <.pub file> <target-ip> ... Copy keys to remote site; for Windows: use scp or sftp (next subsection) instead of ssh-copy-id
+ssh-copy-id -i <.pub file> <target-ip> ... Copy public key to remote site (and target user); for Windows: use scp or sftp (next subsection) instead of ssh-copy-id
 --> i ... inputfile
 
 now on remote site: --> ssh <IP> --> Asking for passphrase now :D
@@ -852,7 +852,7 @@ dpkg -b ./helloworld helloworld.deb
 --> if you forgot to remove the .sh, you can execute it as helloworld.sh
 
 ------------------------------------------------------------------------------------------------------------------------------
-System Control
+Managing Processes
 ------------------------------------------------------------------------------------------------------------------------------
 
 systemctl start|stop|restart <service> ... Starting, stopping, restarting a service
@@ -863,10 +863,6 @@ systemctl enable --now <service> ... start and enable at once
 
 systemctl status <service> ... checking on the status of a service:
 
-------------------------------------------------------------------------------------------------------------------------------
-Managing Processes
-------------------------------------------------------------------------------------------------------------------------------
-
 top / htop ... for memory and CPU usage
 
 kill <pid> ... terminating process
@@ -874,10 +870,10 @@ kill <pid> ... terminating process
 -SIGKILL or -9 ... immediately stop
 
 ps / ps lf ... see processes
-renice <number> <pid> ... newer nice number (priority number from -20 to 19, lower better)
+renice <number> <pid> ... new nice number (priority number from -20 to 19, lower better)
 -u ... usernamen
 -ef ... processes in sys in detail
--eLf ... information of every threade
+-eLf ... information of every thread
 ps aux ... processes of all users
 ps axo ... specific attributes
 ps au --sort=-%mem ... processes sorted by %mem, highest at first (without - ... lowest at first)
@@ -941,6 +937,91 @@ can create own profiles (or copy and change existing ones) --> man tuned-adm
 predefined: /usr/lib/tuned/profiles/ ; from user: /etc/tuned/profiles/
 
 ------------------------------------------------------------------------------------------------------------------------------
+Booting the system and GRUB
+------------------------------------------------------------------------------------------------------------------------------
+
+Configurations
+----------------------
+
+after initializing the hardware, GRUB2 will boot, GRUB2 starts the OS
+--> menu, where you can choose different OS or some secure-boot options
+
+/etc/default/grub ... config-file, more configurations unter /etc/grub.d (dir)
+grub2-editenv list ... show some hidden options, e.g. if the menu before boot is hidden
+grub2-editenv - unset menu_auto_hide ... unhide the menu
+grub2-mkconfig -o /boot/grub2/grub.cfg ... save and create new configuration
+
+grubby ... for configuring grub (and zipl)
+--info=<kernel-path> ... show information of all boot entries; kernel-path: DEFAULT ... default kernel, ALL ... all kernels, <path> ... from this kernel
+--add-kernel=<kernel-path> ... add new boot entry
+--make-default ... last added entry is default now
+--set-default=<kernel-path> ... set new default kernel
+--remove-kernel=<kernel-path> ... remove mathing boot entry 
+--update-kernel=<kernel-path> --remove-args="<arg>" ... remove kernel argument
+--update-kernel=<kernel-path> --args="<arg>" ... add kernel argument
+--> kernel-path can be ALL --> all kernels
+
+Targets
+----------------------
+
+target ... group of units; desired state of system
+Importent targets: graphical.target (GUI + Console), multi-user.target (Console), rescue.target (minimum)
+
+systemctl get-default ... show current target
+systemctl list-units --type=target ... activ and loaded units of Systemd
+sudo systemctl isolate <target> ... change target now
+sudo systemctl set-default <target> ... set target to default (permanently)
+
+to start in a target while booting: 
+1. when GRUB2 show menu --> 'e' at first entry
+2. line with "linux" --> append "systemd=<target>"
+3. Strg+x; system is booting
+
+Reset Root-Password without permissions
+----------------------
+
+requirments: GRUB not hidden, no encrypted disk, no GRUB-password, physical access
+sometimes: Secure Boot-Safety disable, unlocked firmware
+--> high risk
+
+works for Red Hat Enterprise Linux (tested)/Fedora/Rocky/Alma
+
+1. when GRUB2 show menu --> 'e' at first entry
+2. line with "linux" --> "ro" to "rw"; remove "rhgb quit"; append "init=/bin/bash"
+3. Strg+x; shell is starting
+4. passwd ... change password
+5. touch /.autorelabel ... initializes relabling from SELinux for new passwd-file
+6. sync ... synchronizes changes, otherwise, the new password won't be set
+7. exec /sbin/init ... starts the OS
+
+for Debian/Ubuntu/Mint (not tested!)
+--> probably Recovery Mode (resetting administration password)
+
+1. when GRUB2 show menu --> 'e' at first entry
+2. line with "linux" --> "ro" to "rw"; remove "rhgb quit"; append "init=/bin/bash"
+3. Strg+x; shell is starting
+4. passwd ... change password
+5. sync ... synchronizes changes, otherwise, the new password won't be set
+6. exec /sbin/init ... starts the OS
+
+------------------------------------------------------------------------------------------------------------------------------
+Templating Images
+------------------------------------------------------------------------------------------------------------------------------
+
+Bootc
+--------------------
+
+Configuration file for describing OS
+--> switch OS with apps, configurations, settings, ...
+
+Like a containerized sys / template of sys, you can exchange it with newer versions
+
+Bootc status ... information about current version, ...
+
+Bootc switch <dir> ... use this new version of container/OS/sys after reboot
+--> used quay.io in video for dir
+
+------------------------------------------------------------------------------------------------------------------------------
 Logging (Journalctl, ausearch)
 ------------------------------------------------------------------------------------------------------------------------------
 
@@ -970,23 +1051,6 @@ ausearch ... show logs, raw file, more detailed
 -te <time> ... same like ts, but with end time
 -m <message-type> ... search for specific message types (also comma separated list possible); many types, shown when left empty, avc for selinux denials, selinux_err, user_selinux_err
 -i ... interpret numeric values to text, e.g. UID to Name
-
-------------------------------------------------------------------------------------------------------------------------------
-Templating Images
-------------------------------------------------------------------------------------------------------------------------------
-
-Bootc
---------------------
-
-Configuration file for describing OS
---> switch OS with apps, configurations, settings, ...
-
-Like a containerized sys / template of sys, you can exchange it with newer versions
-
-Bootc status ... information about current version, ...
-
-Bootc switch <dir> ... use this new version of container/OS/sys after reboot
---> used quay.io in video for dir
 
 ------------------------------------------------------------------------------------------------------------------------------
 Automated Jobs
@@ -1785,45 +1849,6 @@ lvremove <LV> ... remove LV
 vgremove <VG> ... remove VG
 
 pvremove <device> ... remove LVM-disk-label from device
-
-------------------------------------------------------------------------------------------------------------------------------
-Grub-Loader
-------------------------------------------------------------------------------------------------------------------------------
-
-after initializing the hardware, GRUB2 will boot, GRUB2 starts the OS
---> menu, where you can choose different OS or some secure-boot options
-
-/etc/default/grub ... config-file, more configurations unter /etc/grub.d (dir)
-grub2-editenv list ... show some hidden options, e.g. if the menu before boot is hidden
-grub2-editenv - unset menu_auto_hide ... unhide the menu
-grub2-mkconfig -o /boot/grub2/grub.cfg ... save and create new configuration
-
-Reset Root-Password without permissions
-----------------------
-
-requirments: GRUB not hidden, no encrypted disk, no GRUB-password, physical access
-sometimes: Secure Boot-Safety disable, unlocked firmware
---> high risk
-
-works for Red Hat Enterprise Linux (tested)/Fedora/Rocky/Alma
-
-1. when GRUB2 show menu --> 'e' at first entry
-2. line with "linux" --> "ro" to "rw"; remove "rhgb quit"; append "init=/bin/bash"
-3. Strg+x; shell is starting
-4. passwd ... change password
-5. touch /.autorelabel ... initializes relabling from SELinux for new passwd-file
-6. sync ... synchronizes changes, otherwise, the new password won't be set
-7. exec /sbin/init ... starts the OS
-
-for Debian/Ubuntu/Mint (not tested!)
---> probably Recovery Mode (resetting administration password)
-
-1. when GRUB2 show menu --> 'e' at first entry
-2. line with "linux" --> "ro" to "rw"; remove "rhgb quit"; append "init=/bin/bash"
-3. Strg+x; shell is starting
-4. passwd ... change password
-5. sync ... synchronizes changes, otherwise, the new password won't be set
-6. exec /sbin/init ... starts the OS
 
 ------------------------------------------------------------------------------------------------------------------------------
 SELinux
