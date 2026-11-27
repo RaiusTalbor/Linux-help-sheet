@@ -36,7 +36,7 @@ Synchronize Directories
 Compressing (gzip, bzip2, xz, zip, tar)
 Users (Managing Users, group users)
 Permissions
-Network settings (Iptables, Nftables, Interfaces, NetworkManager - nmcli, Network Name Spaces, Ports)
+Network settings (Iptables, Nftables, Interfaces, NetworkManager - nmcli, Network Name Spaces, Ports, LLDP)
 Firewall (firewalld)
 Administration settings
 Managing Storage (Basics, Mounting, file systems, Creating partitions)
@@ -45,6 +45,7 @@ Grub-Loader (Basics and resetting password without permissions)
 SELinux
 Containerisation (Podman / Docker)
 Curl
+Git
 
 ------------------------------------------------------------------------------------------------------------------------------
 Installation
@@ -1328,6 +1329,16 @@ ss ... a list of open non-listening sockets (e.g. TCP/UNIX/UDP) that have establ
 
 --> port-forwarding --> Firewall
 
+LLDP (lldpd)
+----------------------
+
+debugging of physical network on layer 2 (and not 3)
+has to be installed on both systems
+
+lldpctl ... show neighbors
+lldpctl <interface> ... show information and neighbors of this interface
+lldpctl -f json ... output to json
+
 ------------------------------------------------------------------------------------------------------------------------------
 Firewall (Firewalld)
 ------------------------------------------------------------------------------------------------------------------------------
@@ -1993,3 +2004,42 @@ Curl
 curl <url> ... show information about a http file of <url> (in general), url can be a website, localhost, ip, ...
 -v ... verbose, show more information
 -I ... show header only, sometimes some general information
+
+------------------------------------------------------------------------------------------------------------------------------
+Git
+------------------------------------------------------------------------------------------------------------------------------
+
+--> https://www.atlassian.com/git/glossary#commands
+
+Configuration
+----------------------
+
+git config --global user.name "<username>"
+git config --global user.email "<email>"
+git config --global init.defaultBranch "main" ... default default Branch, in general "main"
+
+Create Repository
+----------------------
+
+git init  ... creates a Git repository in the working directory
+
+git add <file> ... git tracks now this file
+
+Commit
+----------------------
+
+git commit -am "<description>"
+
+Branches
+----------------------
+
+git branch <branch name> ... create new branch in working dir
+git checkout <branch_name> ... change to new branch
+git branch -d <branch> ... when changes are applied, there is no need for the extra branch; delete it
+
+Merging
+----------------------
+
+--> move back to branch, in which the changes should be applied (git checkout main)
+
+git merge <branch_name, from which the changes came from>
